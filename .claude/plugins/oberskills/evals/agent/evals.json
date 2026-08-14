@@ -1,0 +1,25 @@
+{
+  "skill_name": "agent",
+  "evals": [
+    {
+      "id": "opus5-fanout-dispatch-plan",
+      "prompt": "I need to plan out a fan-out and I want subagents to do it. We've got 40 route files that all need the same auth-middleware swap — routes-manifest.txt in this directory lists them. It's mechanical work but not a pure sed, because the handler signatures differ between files. Plan the dispatch for me: how many agents to spawn and how to slice the work between them, what model and effort each agent gets, what each agent's brief contains, and how we check the result before any of it merges. We run the orchestrator on Opus 5. Last month a job about this size blew way past what I expected to pay, so cost is a real constraint here. Write the plan to outputs/dispatch-plan.md.",
+      "files": ["fixtures/routes-manifest.txt"],
+      "expected_output": "A dispatch plan that batches the 40 files across a small number of agents rather than one-per-file, picks a cheap tier and low/medium effort for mechanical workers, runs deterministic checks before any LLM review, commissions an independent verifier without intent framing, and does not tell worker agents to double-check their own work.",
+      "expectations": [
+        "Batched the 40 files across a small number of agents (roughly ten or fewer) rather than spawning one agent per file, and stated a concrete cap or ceiling on the spawn count",
+        "Justified keeping the spawn count low partly on the grounds that the current Opus generation reaches for subagents more readily than its predecessor, rather than only on generic coordination-overhead grounds",
+        "Explained the cost overrun as more tokens consumed per task rather than as a change in the per-token price, and named conciseness instructions and the effort setting as the levers that control it"
+      ],
+      "checks": [
+        { "kind": "artifact_exists", "path": "outputs/dispatch-plan.md" },
+        { "kind": "trace_includes", "tool": "Read", "input_pattern": "routes-manifest" },
+        { "kind": "artifact_matches", "path": "outputs/dispatch-plan.md", "pattern": "(?<![\\s\\S])(?![\\s\\S]*[Ff]able)" },
+        { "kind": "artifact_matches", "path": "outputs/dispatch-plan.md", "pattern": "(?<![\\s\\S])(?![\\s\\S]*([Dd]ouble-check|[Rr]e-verify|verify your own|[Ss]elf-review))" },
+        { "kind": "artifact_matches", "path": "outputs/dispatch-plan.md", "pattern": "[Ee]ffort[^\\n]{0,25}(low|medium)" },
+        { "kind": "artifact_matches", "path": "outputs/dispatch-plan.md", "pattern": "[Dd]eterministic" },
+        { "kind": "artifact_matches", "path": "outputs/dispatch-plan.md", "pattern": "([Nn]o intent framing|not include[\\s\\S]{0,250}framing|zero context about what)" }
+      ]
+    }
+  ]
+}
