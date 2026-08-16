@@ -1,0 +1,267 @@
+---
+/**
+ * Sticky header. Collapses to an off-canvas panel below 640px.
+ */
+import { profile, navLinks } from '../data/profile';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<header class="header" data-header>
+  <div class="container header__inner">
+    <a class="wordmark" href="#top" aria-label={`${profile.name} — back to top`}>
+      {profile.name}
+    </a>
+
+    <nav class="nav" id="nav-menu" data-nav-menu aria-label="Primary">
+      <ul class="nav__list">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a class="nav__link" href={link.href} data-nav-link>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <ThemeToggle />
+      <button
+        type="button"
+        class="nav-toggle"
+        data-nav-toggle
+        aria-expanded="false"
+        aria-controls="nav-menu"
+        aria-label="Open menu"
+      >
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--duration) var(--ease-quart-out);
+  }
+
+  /* A hairline appears only once the page has scrolled, so the header sits
+     flush against the hero at rest. */
+  .header.is-scrolled {
+    border-bottom-color: var(--border);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: var(--header-height);
+  }
+
+  .wordmark {
+    /* inline-flex + min-height keeps the hit area at the 44px minimum without
+       changing how the text sits. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 1.25rem;
+    letter-spacing: var(--tracking-tight);
+    transition: color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .wordmark:hover {
+    color: var(--accent);
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .nav__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .nav__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    /* 10px rather than --space-2 (8px): with a ~25px line box this lands the
+       target at 44px tall, the accessible minimum. */
+    padding-block: 10px;
+    min-height: 44px;
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+    transition: color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  /* Underline grows from the left on hover and for the active section. */
+  .nav__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration) var(--ease-expo-out);
+  }
+
+  .nav__link:hover,
+  .nav__link.is-active {
+    color: var(--fg);
+  }
+
+  .nav__link:hover::after,
+  .nav__link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  /* --- Hamburger --- */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background-color: transparent;
+    cursor: pointer;
+  }
+
+  .nav-toggle__bar {
+    display: block;
+    width: 17px;
+    height: 1.5px;
+    background-color: currentColor;
+    border-radius: 2px;
+    transition: transform var(--duration-fast) var(--ease-quart-out),
+      opacity var(--duration-fast) var(--ease-quart-out);
+  }
+
+  /* Bars cross into an X when the panel is open. */
+  .nav-toggle[aria-expanded='true'] .nav-toggle__bar:first-child {
+    transform: translateY(3.25px) rotate(45deg);
+  }
+
+  .nav-toggle[aria-expanded='true'] .nav-toggle__bar:last-child {
+    transform: translateY(-3.25px) rotate(-45deg);
+  }
+
+  /* --- Mobile --- */
+  @media (max-width: 640px) {
+    .nav-toggle {
+      display: flex;
+    }
+
+    .nav {
+      position: fixed;
+      inset: var(--header-height) 0 auto 0;
+      background-color: var(--bg);
+      border-bottom: 1px solid var(--border);
+      /* Hidden by clip + translate rather than display:none so the panel can
+         animate, and `visibility` keeps it out of the tab order when closed. */
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity var(--duration) var(--ease-expo-out),
+        transform var(--duration) var(--ease-expo-out),
+        visibility 0s linear var(--duration);
+    }
+
+    .nav.is-open {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0s;
+    }
+
+    .nav__list {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: var(--space-3) clamp(1.25rem, 5vw, 3rem) var(--space-5);
+    }
+
+    .nav__link {
+      display: block;
+      padding-block: var(--space-4);
+      font-size: 1.0625rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav__link::after {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-nav-menu]');
+  const header = document.querySelector<HTMLElement>('[data-header]');
+
+  if (toggle && menu) {
+    const setOpen = (open: boolean) => {
+      menu.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    // Close after navigating to a section.
+    menu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (toggle.getAttribute('aria-expanded') !== 'true') return;
+      setOpen(false);
+      // Return focus to the control that opened the panel.
+      toggle.focus();
+    });
+
+    // Click outside the panel closes it.
+    document.addEventListener('click', (event) => {
+      if (toggle.getAttribute('aria-expanded') !== 'true') return;
+      const target = event.target as Node;
+      if (menu.contains(target) || toggle.contains(target)) return;
+      setOpen(false);
+    });
+
+    // Reset state if the viewport grows past the mobile breakpoint while open.
+    window.matchMedia('(min-width: 641px)').addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+
+  // Hairline under the header once the page scrolls.
+  if (header) {
+    const syncScrolled = () => header.classList.toggle('is-scrolled', window.scrollY > 8);
+    syncScrolled();
+    window.addEventListener('scroll', syncScrolled, { passive: true });
+  }
+</script>

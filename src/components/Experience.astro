@@ -1,0 +1,144 @@
+---
+import { experience } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section class="section" id="experience" aria-labelledby="experience-heading">
+  <div class="container">
+    <SectionHeading id="experience-heading" eyebrow="Experience" title="Where I've worked" />
+
+    <ol class="timeline">
+      {
+        experience.map((role, i) => (
+          <li class="entry reveal" style={`--reveal-delay: ${i * 90}ms`}>
+            <div class="entry__meta">
+              {/* Machine-readable dates for search engines and assistive tech;
+                  the human-readable label is what's shown. */}
+              <p class="entry__dates">
+                <time datetime={role.startDate}>{role.dateLabel.split('—')[0].trim()}</time>
+                {' — '}
+                {role.endDate ? (
+                  <time datetime={role.endDate}>{role.dateLabel.split('—')[1].trim()}</time>
+                ) : (
+                  <span>Present</span>
+                )}
+              </p>
+              <p class="entry__location">{role.location}</p>
+            </div>
+
+            <div class="entry__body">
+              <h3 class="entry__title">{role.title}</h3>
+              <p class="entry__company">{role.company}</p>
+
+              <ul class="highlights">
+                {role.highlights.map((highlight) => (
+                  <li>{highlight}</li>
+                ))}
+              </ul>
+
+              <ul class="tags" aria-label={`Technologies used at ${role.company}`}>
+                {role.tech.map((tech) => (
+                  <li class="tag">{tech}</li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .entry {
+    display: grid;
+    gap: var(--space-3);
+    padding-left: var(--space-5);
+    /* The rule plus the dot below form the timeline spine. */
+    border-left: 1px solid var(--border);
+    position: relative;
+  }
+
+  .entry::before {
+    content: '';
+    position: absolute;
+    left: -4.5px;
+    top: 0.55rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--accent);
+  }
+
+  @media (min-width: 820px) {
+    .entry {
+      grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+      gap: var(--space-6);
+      padding-left: var(--space-6);
+    }
+  }
+
+  .entry__dates {
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  .entry__location {
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+  }
+
+  .entry__title {
+    margin-bottom: var(--space-1);
+  }
+
+  .entry__company {
+    color: var(--accent);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    margin-bottom: var(--space-4);
+  }
+
+  .highlights {
+    display: grid;
+    gap: var(--space-2);
+    max-width: var(--measure);
+    margin-bottom: var(--space-4);
+  }
+
+  .highlights li {
+    position: relative;
+    padding-left: var(--space-5);
+    color: var(--fg-muted);
+  }
+
+  /* Typographic bullet rather than a list marker, so it inherits the accent. */
+  .highlights li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 10px;
+    height: 1px;
+    background-color: var(--border-strong);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .tag {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+  }
+</style>

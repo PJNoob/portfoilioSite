@@ -1,0 +1,160 @@
+---
+/**
+ * The single page shell: fonts, metadata, theme bootstrap, and chrome.
+ */
+import { Font } from 'astro:assets';
+import { profile, socials } from '../data/profile';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = `${profile.name} — ${profile.title}`, description = profile.metaDescription } =
+  Astro.props;
+
+// Astro.site comes from `site` in astro.config.mjs. Falls back gracefully so
+// a missing config never breaks the build.
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
+
+// Structured data helps search engines render a richer result for your name.
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: profile.title,
+  email: `mailto:${profile.email}`,
+  url: canonical,
+  address: { '@type': 'PostalAddress', addressLocality: profile.location },
+  sameAs: socials.filter((s) => !s.href.startsWith('mailto:')).map((s) => s.href),
+};
+---
+
+{/* `no-js` is removed by the inline script below; it gates the CSS fallback
+    that keeps scroll-reveal content visible when JavaScript is unavailable. */}
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* Open Graph / Twitter */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    {/* Self-hosted, subset and preloaded. No external font request is made,
+        and the fallback metrics Astro emits keep layout shift at ~0. */}
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-body" preload />
+
+    {/*
+      Theme bootstrap. `is:inline` is essential here — without it Astro would
+      bundle and defer this script, which means it would run after first paint
+      and the user would see a flash of the wrong theme on every load.
+    */}
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        root.classList.remove('no-js');
+        try {
+          var saved = localStorage.getItem('theme');
+          if (saved === 'light' || saved === 'dark') {
+            root.setAttribute('data-theme', saved);
+          }
+          // No saved choice: leave the attribute off so the CSS
+          // prefers-color-scheme media query decides.
+        } catch (e) {
+          /* localStorage can throw in private mode; the OS default still applies. */
+        }
+      })();
+    </script>
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      // ---------------------------------------------------------------------
+      // Scroll reveal + scrollspy. Astro bundles, minifies and defers this.
+      // ---------------------------------------------------------------------
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // --- Reveal on scroll ---
+      const revealTargets = document.querySelectorAll<HTMLElement>('.reveal');
+
+      if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+        // Show everything immediately rather than animating it in.
+        revealTargets.forEach((el) => el.classList.add('is-visible'));
+      } else {
+        const revealObserver = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-visible');
+              // Fire once — no need to keep observing.
+              revealObserver.unobserve(entry.target);
+            }
+          },
+          // Trigger slightly before the element reaches the bottom edge so the
+          // animation is already underway when it comes into view.
+          { rootMargin: '0px 0px -12% 0px', threshold: 0.1 }
+        );
+        revealTargets.forEach((el) => revealObserver.observe(el));
+      }
+
+      // --- Scrollspy: highlight the nav link for the section in view ---
+      const navLinkEls = Array.from(
+        document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]')
+      );
+      const sections = navLinkEls
+        .map((link) => document.querySelector<HTMLElement>(link.hash))
+        .filter((el): el is HTMLElement => el !== null);
+
+      if (sections.length && 'IntersectionObserver' in window) {
+        const setActive = (id: string) => {
+          for (const link of navLinkEls) {
+            const isActive = link.hash === `#${id}`;
+            link.classList.toggle('is-active', isActive);
+            if (isActive) {
+              link.setAttribute('aria-current', 'true');
+            } else {
+              link.removeAttribute('aria-current');
+            }
+          }
+        };
+
+        const spyObserver = new IntersectionObserver(
+          (entries) => {
+            // Pick the entry closest to the top of the viewport so fast
+            // scrolling through several sections still lands on the right one.
+            const visible = entries
+              .filter((e) => e.isIntersecting)
+              .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+            if (visible[0]) setActive(visible[0].target.id);
+          },
+          // A band across the upper-middle of the viewport.
+          { rootMargin: '-20% 0px -70% 0px' }
+        );
+        sections.forEach((section) => spyObserver.observe(section));
+      }
+    </script>
+  </body>
+</html>

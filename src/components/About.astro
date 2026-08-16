@@ -1,0 +1,115 @@
+---
+import { profile } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section class="section" id="about" aria-labelledby="about-heading">
+  <div class="container">
+    <SectionHeading id="about-heading" eyebrow="About" title="A little background" />
+
+    <div class="about">
+      <div class="about__body reveal">
+        {profile.about.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+
+      <aside class="about__aside reveal" style="--reveal-delay: 120ms">
+        {/* Inline SVG monogram — no external image to load or hotlink.
+            Replace with an <img> of a real photo if you prefer. */}
+        <div class="monogram" role="img" aria-label={`${profile.name} monogram`}>
+          <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <rect width="120" height="120" rx="12" class="monogram__bg"></rect>
+            <text x="60" y="62" class="monogram__text">{profile.initials}</text>
+          </svg>
+        </div>
+
+        <dl class="stats">
+          {
+            profile.highlights.map((item) => (
+              <div class="stats__item">
+                <dt class="stats__label">{item.label}</dt>
+                <dd class="stats__value">{item.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  /* Asymmetric split rather than an even two-column grid — the text column
+     carries more weight, which keeps the reading line comfortable. */
+  @media (min-width: 900px) {
+    .about {
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+      gap: var(--space-8);
+      align-items: start;
+    }
+  }
+
+  .about__body {
+    max-width: var(--measure);
+  }
+
+  .about__body p + p {
+    margin-top: var(--space-4);
+  }
+
+  .about__body p {
+    color: var(--fg-muted);
+  }
+
+  .about__aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .monogram {
+    width: clamp(6rem, 18vw, 8.5rem);
+  }
+
+  .monogram__bg {
+    fill: var(--accent-wash);
+    stroke: var(--border);
+  }
+
+  .monogram__text {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 44px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    fill: var(--accent);
+  }
+
+  .stats {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .stats__item {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+  }
+
+  .stats__value {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 1.75rem;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .stats__label {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    margin-bottom: var(--space-2);
+  }
+</style>

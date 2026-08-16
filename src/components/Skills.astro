@@ -1,0 +1,86 @@
+---
+/**
+ * Grouped tags rather than percentage bars. "React 85%" isn't verifiable and
+ * tends to read as naive to engineers; categories communicate range honestly.
+ */
+import { skillGroups } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section class="section" id="skills" aria-labelledby="skills-heading">
+  <div class="container">
+    <SectionHeading id="skills-heading" eyebrow="Skills" title="What I work with" />
+
+    <div class="groups">
+      {
+        skillGroups.map((group, groupIndex) => (
+          <section class="group reveal" style={`--reveal-delay: ${groupIndex * 110}ms`}>
+            <h3 class="group__name">{group.name}</h3>
+            {/* Each chip trails the one before it so the group assembles
+                rather than appearing all at once. */}
+            <ul class="skills">
+              {group.items.map((item, itemIndex) => (
+                <li
+                  class="skill"
+                  style={`--reveal-delay: ${groupIndex * 110 + itemIndex * 45}ms`}
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .groups {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  @media (min-width: 820px) {
+    .groups {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+
+  .group__name {
+    font-size: var(--text-xs);
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .skill {
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-sm);
+    transition:
+      border-color var(--duration-fast) var(--ease-quart-out),
+      color var(--duration-fast) var(--ease-quart-out),
+      transform var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .skill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+</style>

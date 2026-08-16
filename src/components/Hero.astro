@@ -1,0 +1,181 @@
+---
+/**
+ * The signature moment. Oversized display type against small body text — the
+ * scale contrast is roughly 10:1 at desktop widths, and that tension is what
+ * makes someone stop scrolling.
+ *
+ * Entry motion is choreographed rather than simultaneous: the words rise in
+ * sequence, then the supporting content follows.
+ */
+import { profile } from '../data/profile';
+---
+
+<section class="hero" id="top">
+  <div class="container hero__inner">
+    <p class="hero__label">{profile.title}</p>
+
+    <h1 class="hero__title">
+      {
+        profile.headline.map((word, i) => (
+          <span class="hero__line">
+            {/* The inner span is what actually moves; the outer line clips it,
+                so each word rises out of a mask rather than just fading. */}
+            <span class="hero__word" style={`--delay: ${180 + i * 80}ms`}>
+              {word}
+            </span>
+          </span>
+        ))
+      }
+    </h1>
+
+    <p class="hero__tagline">{profile.tagline}</p>
+
+    <div class="hero__actions">
+      <a class="button" href="#projects">View my work</a>
+      <a class="button button--ghost" href="#contact">Get in touch</a>
+    </div>
+
+    <p class="hero__meta">
+      <span>{profile.location}</span>
+      <span aria-hidden="true">·</span>
+      <a href={`mailto:${profile.email}`}>{profile.email}</a>
+    </p>
+  </div>
+
+  <span class="hero__scroll" aria-hidden="true">Scroll</span>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    /* Fills the viewport minus the header, without the 100vh mobile bug. */
+    min-height: calc(100svh - var(--header-height));
+    padding-block: var(--space-8) var(--space-9);
+  }
+
+  .hero__inner {
+    width: 100%;
+  }
+
+  .hero__label {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    margin-bottom: var(--space-5);
+    animation: fade-up var(--duration-slow) var(--ease-expo-out) both;
+  }
+
+  .hero__title {
+    font-size: var(--text-hero);
+    /* Slight optical pull to the left so the large type aligns visually
+       rather than mathematically. */
+    margin-left: -0.04em;
+    margin-bottom: var(--space-5);
+  }
+
+  .hero__line {
+    display: block;
+    /* Masks the word so it rises into view. */
+    overflow: hidden;
+    padding-bottom: 0.08em;
+  }
+
+  .hero__word {
+    display: inline-block;
+    animation: rise var(--duration-slow) var(--ease-expo-out) both;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  .hero__tagline {
+    max-width: 46ch;
+    font-size: var(--text-lead);
+    color: var(--fg-muted);
+    margin-bottom: var(--space-6);
+    animation: fade-up var(--duration-slow) var(--ease-expo-out) 440ms both;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-7);
+    animation: fade-up var(--duration-slow) var(--ease-expo-out) 560ms both;
+  }
+
+  .hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+    animation: fade-up var(--duration-slow) var(--ease-expo-out) 680ms both;
+  }
+
+  .hero__meta a {
+    border-bottom: 1px solid var(--border-strong);
+    transition: color var(--duration-fast) var(--ease-quart-out),
+      border-color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .hero__meta a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .hero__scroll {
+    position: absolute;
+    right: clamp(1.25rem, 5vw, 3rem);
+    bottom: var(--space-6);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    writing-mode: vertical-rl;
+    animation: fade-up var(--duration-slow) var(--ease-expo-out) 800ms both;
+  }
+
+  @media (max-width: 640px) {
+    .hero__scroll {
+      display: none;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* The global reduced-motion block already collapses durations, but these
+     elements start at opacity 0 / translated, so land them explicitly. */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__label,
+    .hero__word,
+    .hero__tagline,
+    .hero__actions,
+    .hero__meta,
+    .hero__scroll {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

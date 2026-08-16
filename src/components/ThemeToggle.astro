@@ -1,0 +1,138 @@
+---
+/**
+ * Light/dark switch. The initial theme is applied by the inline script in
+ * BaseLayout before first paint; this only handles user-initiated changes.
+ */
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  data-theme-toggle
+  aria-label="Toggle colour theme"
+  title="Toggle colour theme"
+>
+  {/* Both icons are rendered; CSS shows whichever matches the active theme.
+      This avoids a server/client mismatch, since the server cannot know the
+      visitor's OS preference. */}
+  <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="4.2"></circle>
+    <path
+      d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"
+    ></path>
+  </svg>
+  <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"></path>
+  </svg>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* 44px minimum tap target. */
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background-color: transparent;
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) var(--ease-quart-out),
+      color var(--duration-fast) var(--ease-quart-out),
+      transform var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .icon {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Light theme is active -> offer the moon (switch to dark). */
+  .icon--sun {
+    display: none;
+  }
+  .icon--moon {
+    display: block;
+  }
+
+  /* Dark via OS preference, unless the user explicitly chose light. */
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .icon--sun {
+      display: block;
+    }
+    :global(:root:not([data-theme='light'])) .icon--moon {
+      display: none;
+    }
+  }
+
+  /* Dark via explicit choice. */
+  :global(:root[data-theme='dark']) .icon--sun {
+    display: block;
+  }
+  :global(:root[data-theme='dark']) .icon--moon {
+    display: none;
+  }
+
+  /* Explicit light must win over the OS media query above. */
+  :global(:root[data-theme='light']) .icon--sun {
+    display: none;
+  }
+  :global(:root[data-theme='light']) .icon--moon {
+    display: block;
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+
+  if (toggle) {
+    const root = document.documentElement;
+
+    /** The theme actually being rendered right now. */
+    const currentTheme = (): 'light' | 'dark' => {
+      const explicit = root.getAttribute('data-theme');
+      if (explicit === 'light' || explicit === 'dark') return explicit;
+      // No explicit choice: whatever the OS asks for.
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const syncLabel = () => {
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      const label = `Switch to ${next} theme`;
+      toggle.setAttribute('aria-label', label);
+      toggle.setAttribute('title', label);
+    };
+
+    toggle.addEventListener('click', () => {
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('theme', next);
+      } catch (e) {
+        /* Private mode: the choice just won't persist across reloads. */
+      }
+      syncLabel();
+    });
+
+    // Keep the label correct if the OS theme changes while no explicit
+    // choice is stored.
+    window
+      .matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', syncLabel);
+
+    syncLabel();
+  }
+</script>

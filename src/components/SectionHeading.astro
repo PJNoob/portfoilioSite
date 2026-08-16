@@ -1,0 +1,25 @@
+---
+/**
+ * Shared section header: small accent eyebrow above a display-face title.
+ * `id` is referenced by each section's aria-labelledby.
+ */
+interface Props {
+  id: string;
+  eyebrow: string;
+  title: string;
+}
+
+const { id, eyebrow, title } = Astro.props;
+---
+
+<div class="heading reveal">
+  <span class="eyebrow">{eyebrow}</span>
+  <h2 id={id}>{title}</h2>
+</div>
+
+<style>
+  .heading {
+    margin-bottom: var(--space-7);
+    max-width: var(--measure);
+  }
+</style>

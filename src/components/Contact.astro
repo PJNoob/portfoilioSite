@@ -1,0 +1,362 @@
+---
+/**
+ * Direct links first, form second — people generally prefer emailing you to
+ * filling in a form. The form is a convenience, not the only route.
+ *
+ * There is no backend: submitting composes a prefilled mailto: link. See the
+ * README for swapping in Formspree or Netlify Forms with a one-line change.
+ */
+import { profile, socials } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section class="section" id="contact" aria-labelledby="contact-heading">
+  <div class="container">
+    <SectionHeading id="contact-heading" eyebrow="Contact" title="Let's work together" />
+
+    <div class="contact">
+      <div class="contact__direct reveal">
+        <p class="contact__lead">
+          The quickest way to reach me is email. I read everything and reply to
+          anything that isn't a recruiter template.
+        </p>
+
+        <div class="email-row">
+          <a class="email" href={`mailto:${profile.email}`}>{profile.email}</a>
+          <button type="button" class="copy" data-copy-email data-email={profile.email}>
+            <span data-copy-label>Copy</span>
+          </button>
+          {/* Announces the copy result to screen readers without stealing focus. */}
+          <span class="visually-hidden" role="status" aria-live="polite" data-copy-status></span>
+        </div>
+
+        <ul class="socials">
+          {
+            socials.map((social) => (
+              <li>
+                <a
+                  class="social"
+                  href={social.href}
+                  {...(social.href.startsWith('mailto:')
+                    ? {}
+                    : { target: '_blank', rel: 'noopener noreferrer' })}
+                >
+                  <span class="social__label">{social.label}</span>
+                  <span class="social__handle">{social.handle}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <form class="form reveal" style="--reveal-delay: 120ms" data-contact-form novalidate>
+        <div class="field">
+          <label for="contact-name">Name</label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            required
+            autocomplete="name"
+            aria-describedby="contact-name-error"
+          />
+          <p class="error" id="contact-name-error" data-error-for="name"></p>
+        </div>
+
+        <div class="field">
+          <label for="contact-email">Email</label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+            aria-describedby="contact-email-error"
+          />
+          <p class="error" id="contact-email-error" data-error-for="email"></p>
+        </div>
+
+        <div class="field">
+          <label for="contact-message">Message</label>
+          <textarea
+            id="contact-message"
+            name="message"
+            rows="5"
+            required
+            aria-describedby="contact-message-error"></textarea>
+          <p class="error" id="contact-message-error" data-error-for="message"></p>
+        </div>
+
+        <button class="button" type="submit">Send message</button>
+
+        <p class="form__note" role="status" aria-live="polite" data-form-status>
+          This form opens your email client with the message prefilled — nothing
+          is sent to a server.
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  @media (min-width: 900px) {
+    .contact {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-8);
+      align-items: start;
+    }
+  }
+
+  .contact__lead {
+    max-width: 42ch;
+    color: var(--fg-muted);
+    margin-bottom: var(--space-6);
+  }
+
+  .email-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+
+  .email {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: clamp(1.4rem, 3.5vw, 2.1rem);
+    letter-spacing: var(--tracking-tight);
+    border-bottom: 1px solid var(--border-strong);
+    transition:
+      color var(--duration-fast) var(--ease-quart-out),
+      border-color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .email:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .copy {
+    /* Standalone control, so it gets the full 44px target rather than the
+       smaller size that inline links are allowed. */
+    min-height: 44px;
+    padding: var(--space-1) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background-color: transparent;
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) var(--ease-quart-out),
+      color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .copy:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .socials {
+    display: grid;
+    gap: 0;
+  }
+
+  .social {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    /* 44px minimum touch target. */
+    min-height: 44px;
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--border);
+    transition: color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .socials li:last-child .social {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .social:hover {
+    color: var(--accent);
+  }
+
+  .social__label {
+    font-weight: 500;
+    font-size: var(--text-sm);
+  }
+
+  .social__handle {
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+  }
+
+  .social:hover .social__handle {
+    color: inherit;
+  }
+
+  /* --- Form --- */
+  .form {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
+  .field {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--fg);
+    font-size: var(--text-body);
+    transition: border-color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 7rem;
+  }
+
+  input:hover,
+  textarea:hover {
+    border-color: var(--border-strong);
+  }
+
+  input:focus-visible,
+  textarea:focus-visible {
+    border-color: var(--accent);
+  }
+
+  input[aria-invalid='true'],
+  textarea[aria-invalid='true'] {
+    border-color: var(--accent);
+  }
+
+  .error {
+    font-size: var(--text-sm);
+    color: var(--accent);
+    /* Stays out of the layout until it has something to say. */
+    display: none;
+  }
+
+  .error.is-shown {
+    display: block;
+  }
+
+  .form__note {
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+  }
+
+  .button {
+    justify-self: start;
+  }
+</style>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Copy-to-clipboard for the email address.
+  // ---------------------------------------------------------------------------
+  const copyButton = document.querySelector<HTMLButtonElement>('[data-copy-email]');
+  const copyLabel = document.querySelector<HTMLElement>('[data-copy-label]');
+  const copyStatus = document.querySelector<HTMLElement>('[data-copy-status]');
+
+  if (copyButton && copyLabel) {
+    let resetTimer: number | undefined;
+
+    copyButton.addEventListener('click', async () => {
+      const email = copyButton.dataset.email ?? '';
+      try {
+        await navigator.clipboard.writeText(email);
+        copyLabel.textContent = 'Copied';
+        if (copyStatus) copyStatus.textContent = `${email} copied to clipboard`;
+      } catch {
+        // Clipboard API needs a secure context and can be blocked entirely.
+        copyLabel.textContent = 'Press Ctrl+C';
+        if (copyStatus) copyStatus.textContent = 'Copying failed — please copy manually';
+      }
+
+      window.clearTimeout(resetTimer);
+      resetTimer = window.setTimeout(() => {
+        copyLabel.textContent = 'Copy';
+        if (copyStatus) copyStatus.textContent = '';
+      }, 2400);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Contact form. Validates client-side, then hands off to the mail client.
+  // `novalidate` disables native bubbles so we can show inline, described
+  // errors instead — which screen readers announce properly.
+  // ---------------------------------------------------------------------------
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+
+  if (form) {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+
+    const showError = (name: string, message: string) => {
+      const field = form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null;
+      const errorEl = form.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
+      if (!field || !errorEl) return;
+      errorEl.textContent = message;
+      errorEl.classList.toggle('is-shown', message !== '');
+      if (message) {
+        field.setAttribute('aria-invalid', 'true');
+      } else {
+        field.removeAttribute('aria-invalid');
+      }
+    };
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const name = String(data.get('name') ?? '').trim();
+      const email = String(data.get('email') ?? '').trim();
+      const message = String(data.get('message') ?? '').trim();
+
+      // Deliberately permissive: the browser's own type="email" parsing is
+      // stricter than any regex worth maintaining here.
+      const emailField = form.elements.namedItem('email') as HTMLInputElement;
+      const emailLooksValid = email !== '' && emailField.validity.typeMismatch === false;
+
+      showError('name', name === '' ? 'Please enter your name.' : '');
+      showError('email', email === '' ? 'Please enter your email address.' : emailLooksValid ? '' : 'Please enter a valid email address.');
+      showError('message', message === '' ? 'Please enter a message.' : '');
+
+      const firstInvalid = form.querySelector<HTMLElement>('[aria-invalid="true"]');
+      if (firstInvalid) {
+        firstInvalid.focus();
+        return;
+      }
+
+      const to = (copyButton?.dataset.email ?? '').trim();
+      const subject = encodeURIComponent(`Portfolio enquiry from ${name}`);
+      const body = encodeURIComponent(`${message}\n\n— ${name}\n${email}`);
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+
+      if (status) status.textContent = 'Opening your email client…';
+    });
+  }
+</script>

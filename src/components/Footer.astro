@@ -1,0 +1,109 @@
+---
+import { profile, socials } from '../data/profile';
+
+// Evaluated at build time, so the year is correct for each deploy.
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <p class="footer__cta">
+        Available for new work.
+        <a href={`mailto:${profile.email}`}>Say hello</a>
+      </p>
+
+      <ul class="footer__links">
+        {
+          socials.map((social) => (
+            <li>
+              <a
+                href={social.href}
+                {...(social.href.startsWith('mailto:')
+                  ? {}
+                  : { target: '_blank', rel: 'noopener noreferrer' })}
+              >
+                {social.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="footer__bottom">
+      <p>© {year} {profile.name}</p>
+      <p>Built with Astro.</p>
+      <a class="footer__top-link" href="#top">Back to top</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: var(--space-7) var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .footer__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding-bottom: var(--space-6);
+  }
+
+  /* The third and final call to action. */
+  .footer__cta {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: var(--text-h3);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .footer__cta a {
+    color: var(--accent);
+    border-bottom: 1px solid currentColor;
+  }
+
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+  }
+
+  .footer__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+    transition: color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .footer__links a:hover,
+  .footer__top-link:hover {
+    color: var(--accent);
+  }
+
+  .footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+  }
+
+  .footer__top-link {
+    /* Standalone navigation control, not an inline link, so it takes the
+       full 44px target. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    transition: color var(--duration-fast) var(--ease-quart-out);
+  }
+</style>

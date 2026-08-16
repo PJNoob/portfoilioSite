@@ -1,0 +1,4 @@
+# esbuild ships a platform-specific binary via its postinstall script, which
+# pnpm blocks by default. Astro's bundler needs it, so allow it explicitly.
+allowBuilds:
+  esbuild: true

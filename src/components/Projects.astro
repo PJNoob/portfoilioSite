@@ -1,0 +1,197 @@
+---
+/**
+ * The section hiring managers scan first. Each card leads with what the thing
+ * is, then the measurable outcome, then the links that let someone verify it.
+ */
+import { projects } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section class="section" id="projects" aria-labelledby="projects-heading">
+  <div class="container">
+    <SectionHeading id="projects-heading" eyebrow="Projects" title="Selected work" />
+
+    <ul class="grid">
+      {
+        projects.map((project, i) => (
+          <li
+            class:list={['card', 'reveal', { 'card--featured': project.featured }]}
+            style={`--reveal-delay: ${i * 90}ms`}
+          >
+            <h3 class="card__title">{project.name}</h3>
+            <p class="card__summary">{project.summary}</p>
+
+            <p class="card__impact">{project.impact}</p>
+
+            <ul class="tags" aria-label={`Technologies used in ${project.name}`}>
+              {project.tech.map((tech) => (
+                <li class="tag">{tech}</li>
+              ))}
+            </ul>
+
+            <div class="card__links">
+              {project.liveUrl && (
+                <a
+                  class="card__link"
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Live demo
+                  <span class="visually-hidden"> for {project.name} (opens in a new tab)</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                    <path d="M6 3h7v7M13 3 3.5 12.5" />
+                  </svg>
+                </a>
+              )}
+              {project.repoUrl && (
+                <a
+                  class="card__link"
+                  href={project.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Source
+                  <span class="visually-hidden"> for {project.name} (opens in a new tab)</span>
+                  <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                    <path d="M6 3h7v7M13 3 3.5 12.5" />
+                  </svg>
+                </a>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    {/* Second of the three calls to action. */}
+    <div class="cta reveal">
+      <p class="cta__text">Want the full picture, or something built?</p>
+      <a class="button" href="#contact">Start a conversation</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 720px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Featured projects span the full row — varied cell sizes stop the grid
+       reading as a uniform, monotonous 2-up. */
+    .card--featured {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition:
+      transform var(--duration) var(--ease-expo-out),
+      border-color var(--duration) var(--ease-expo-out),
+      box-shadow var(--duration) var(--ease-expo-out);
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+  }
+
+  .card__summary {
+    color: var(--fg-muted);
+    max-width: var(--measure);
+  }
+
+  /* The outcome line is the one that earns the interview, so it gets the
+     accent and a rule to set it apart from the description. */
+  .card__impact {
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--accent);
+    color: var(--fg);
+    font-size: var(--text-sm);
+    max-width: var(--measure);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .tag {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+  }
+
+  .card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: auto;
+    padding-top: var(--space-3);
+  }
+
+  .card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--fg);
+    transition: color var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .card__link svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .card__link:hover {
+    color: var(--accent);
+  }
+
+  .card__link:hover svg {
+    transform: translate(2px, -2px);
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-7);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .cta__text {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: var(--text-h3);
+    letter-spacing: var(--tracking-tight);
+  }
+</style>
