@@ -1,7 +1,6 @@
 ---
 /**
- * What she can be hired for, priced. Naming a starting figure is deliberate:
- * it filters out the wrong enquiries before either side spends a call on them.
+ * What she can be hired for.
  */
 import { services, copy } from '../data/profile';
 import SectionHeading from './SectionHeading.astro';
@@ -27,8 +26,6 @@ import SectionHeading from './SectionHeading.astro';
                 <li class="includes__item">{item}</li>
               ))}
             </ul>
-
-            {service.startingPrice && <p class="service__price">{service.startingPrice}</p>}
           </li>
         ))
       }
@@ -96,12 +93,4 @@ import SectionHeading from './SectionHeading.astro';
     font-weight: 700;
   }
 
-  .service__price {
-    margin-top: auto;
-    padding-top: var(--space-4);
-    font-family: var(--font-display), Impact, sans-serif;
-    font-size: var(--text-h3);
-    text-transform: uppercase;
-    color: var(--accent-ink);
-  }
 </style>

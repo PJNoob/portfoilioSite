@@ -44,13 +44,12 @@ const sections: { href: string; beats: (string | null)[] }[] = [
     beats: services.flatMap((service) => [
       service.name,
       service.description,
-      service.startingPrice,
       ...service.includes,
     ]),
   },
   {
     href: '#process',
-    beats: processSteps.flatMap((step) => [step.title, step.detail, step.turnaround]),
+    beats: processSteps.flatMap((step) => [step.title, step.detail]),
   },
   {
     href: '#words',

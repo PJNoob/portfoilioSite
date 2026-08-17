@@ -39,12 +39,6 @@ import { profile, copy } from '../data/profile';
         <a class="button" href="#work">{copy.hero.primaryCta}</a>
         <a class="button button--ghost" href="#contact">{copy.hero.secondaryCta}</a>
       </div>
-
-      <p class="hero__meta">
-        <span>{profile.location}</span>
-        <span aria-hidden="true">·</span>
-        <a href={`mailto:${profile.email}`}>{profile.email}</a>
-      </p>
     </div>
 
     <ul class="strip" aria-label={copy.hero.stripLabel}>
@@ -133,26 +127,6 @@ import { profile, copy } from '../data/profile';
     animation: fade-up var(--duration-slow) var(--ease-expo-out) 560ms both;
   }
 
-  .hero__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    font-size: var(--text-sm);
-    color: var(--fg-subtle);
-    animation: fade-up var(--duration-slow) var(--ease-expo-out) 680ms both;
-  }
-
-  .hero__meta a {
-    box-shadow: inset 0 -2px 0 var(--border);
-    transition: color var(--duration-fast) var(--ease-quart-out),
-      background-color var(--duration-fast) var(--ease-quart-out);
-  }
-
-  .hero__meta a:hover {
-    background-color: var(--accent-wash);
-    color: var(--accent-ink);
-  }
-
   /* --- Format strip --- */
   .strip {
     display: grid;
@@ -237,8 +211,7 @@ import { profile, copy } from '../data/profile';
     .hero__label,
     .hero__word,
     .hero__tagline,
-    .hero__actions,
-    .hero__meta {
+    .hero__actions {
       animation: none;
       opacity: 1;
       transform: none;

@@ -69,8 +69,6 @@ export interface Service {
   description: string;
   /** Concrete deliverables, not adjectives. */
   includes: string[];
-  /** e.g. "from ₹2,000 / reel". Set to `null` to hide the price line. */
-  startingPrice: string | null;
 }
 
 export interface ProcessStep {
@@ -78,8 +76,6 @@ export interface ProcessStep {
   step: string;
   title: string;
   detail: string;
-  /** How long this stage takes, e.g. "48 hours". */
-  turnaround: string;
 }
 
 export interface Testimonial {
@@ -218,38 +214,30 @@ export const reels: Reel[] = [
 /* Services                                                                    */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Naming a starting price is deliberate: it filters out the wrong enquiries
- * before either of you spends a call on them.
- */
 export const services: Service[] = [
   {
     name: 'Video editing',
     description:
       'The cut itself — vlogs, educational explainers, motivational pieces and trend-led reels, delivered ready to post.',
     includes: ['Full edit and pacing', 'Captions and text', 'Sound design and music', 'Colour pass'],
-    startingPrice: '[from ₹0,000 per reel]',
   },
   {
     name: 'Content strategy',
     description:
       'What to make next and why. Formats, hooks and a posting rhythm your audience will actually keep up with.',
     includes: ['Content calendar', 'Hook and format direction', 'Series planning'],
-    startingPrice: '[from ₹0,000 per month]',
   },
   {
     name: 'Channel marketing',
     description:
       'The rollout around the video — where it goes, when it goes, and what happens in the comments afterwards.',
     includes: ['Campaign planning', 'Cross-platform scheduling', 'Engagement and community'],
-    startingPrice: '[from ₹0,000 per month]',
   },
   {
     name: 'Niche and audience research',
     description:
       'Reading the niche properly: who is watching, what is already working in it, and where the gap is for you.',
     includes: ['Audience breakdown', 'Competitor teardown', 'Positioning notes'],
-    startingPrice: '[from ₹0,000 one-off]',
   },
 ];
 
@@ -263,26 +251,22 @@ export const processSteps: ProcessStep[] = [
     title: 'Send the footage',
     detail:
       'Raw files, the reference you like, and what the video is meant to do. A Drive link is fine.',
-    turnaround: '[Same day reply]',
   },
   {
     step: '02',
     title: 'First cut',
     detail:
       'A full edit with captions, sound and pacing — not a rough draft you have to imagine finished.',
-    turnaround: '[00 hours]',
   },
   {
     step: '03',
     title: 'Your notes',
     detail: 'One round of changes, all in one place, so nothing gets lost across three apps.',
-    turnaround: '[00 hours]',
   },
   {
     step: '04',
     title: 'Ready to post',
     detail: 'Final files in the right ratio, plus a caption and a posting slot that makes sense.',
-    turnaround: '[00 hours]',
   },
 ];
 

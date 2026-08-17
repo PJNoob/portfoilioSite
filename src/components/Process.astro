@@ -1,8 +1,7 @@
 ---
 /**
  * The section that answers the fear behind every enquiry: will you miss my
- * upload date? Each step carries its own turnaround for that reason — the
- * numbers are the content, the steps are just what they attach to.
+ * upload date? Laying out each step of the process builds that confidence.
  *
  * The numbering here is earned: this genuinely is a sequence, and the order
  * is information the reader needs.
@@ -28,7 +27,6 @@ import SectionHeading from './SectionHeading.astro';
             </span>
             <h3 class="step__title">{step.title}</h3>
             <p class="step__detail">{step.detail}</p>
-            <p class="step__turnaround">{step.turnaround}</p>
           </li>
         ))
       }
@@ -84,15 +82,4 @@ import SectionHeading from './SectionHeading.astro';
     color: var(--fg-muted);
   }
 
-  .step__turnaround {
-    margin-top: auto;
-    padding: 2px var(--space-3);
-    background-color: var(--accent);
-    color: var(--accent-contrast);
-    border: var(--border-width) solid var(--border);
-    font-size: var(--text-xs);
-    font-weight: 700;
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-  }
 </style>
