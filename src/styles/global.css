@@ -40,6 +40,13 @@
   --sage: #a2ab73;
   --sage-ink: #1f2416;
 
+  /* Page grounds: the brand's three "pages" as the reader scrolls. Cream is
+     just --bg; yellow and navy get their own tokens so alternating sections
+     can reference them without disturbing --bg-elevated, which other
+     components still use for their own elevated-surface tint. */
+  --page-yellow: #fed24f;
+  --page-navy: #133458;
+
   /* Hard offset shadows, not blurs. The whole construction is flat planes
      with ink outlines; a soft shadow would read as a different design. */
   --shadow: 4px 4px 0 var(--border);
@@ -129,6 +136,8 @@
     --accent-wash: rgba(238, 127, 153, 0.16);
     --sage: #a2ab73;
     --sage-ink: #161a10;
+    --page-yellow: #4a3a0e;
+    --page-navy: #0c1f33;
     --shadow: 4px 4px 0 var(--border);
     --shadow-lg: 6px 6px 0 var(--border);
   }
@@ -151,6 +160,8 @@
   --accent-wash: rgba(238, 127, 153, 0.16);
   --sage: #a2ab73;
   --sage-ink: #161a10;
+  --page-yellow: #4a3a0e;
+  --page-navy: #0c1f33;
   --shadow: 4px 4px 0 var(--border);
   --shadow-lg: 6px 6px 0 var(--border);
 }
@@ -293,7 +304,37 @@ p {
 /* Alternating grounds give the page rhythm without adding ornament. The ink
    rule at the seam is what keeps the change of colour looking deliberate. */
 .section--alt {
-  background-color: var(--bg-elevated);
+  background-color: var(--page-yellow);
+  border-block: var(--border-width) solid var(--border);
+}
+
+/* Navy band: the deep-end brand ground, closing the page (Contact + footer).
+   It's always a dark surface, in both light and dark mode, so it borrows the
+   dark theme's own ink values verbatim rather than re-deriving a second
+   contrast-checked palette — every component here already renders correctly
+   against these exact tokens today, whenever dark mode is active. Redefining
+   them locally means every var() reference inside this subtree — text,
+   borders, --shadow's embedded border colour, form panels — updates for free. */
+.section--navy {
+  --bg: var(--page-navy);
+  --surface: #1c3f66;
+  --fg: #fff7eb;
+  --fg-muted: #c3c6ae;
+  --fg-subtle: #9aa184;
+  --border: #fff7eb;
+  --border-strong: #fff7eb;
+  --accent: #ee7f99;
+  --accent-ink: #ee7f99;
+  --accent-contrast: #161a10;
+  --accent-wash: rgba(238, 127, 153, 0.16);
+  --sage-ink: #161a10;
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+/* Scoped to actual .section elements so it doesn't fight with the footer's
+   own border-top. */
+.section.section--navy {
   border-block: var(--border-width) solid var(--border);
 }
 

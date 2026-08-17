@@ -500,7 +500,10 @@ const waves = stops.map((stop, i) => {
     right: var(--rail-inset);
     width: var(--rail-w);
     border: var(--border-width) solid var(--border);
-    background-color: var(--bg);
+    /* A fixed instrument panel, not the page ground: sections now vary
+       (cream/yellow/navy), so the track must stay consistent rather than
+       trying to match whichever one is currently behind it. */
+    background-color: var(--surface);
     overflow: hidden;
   }
 
