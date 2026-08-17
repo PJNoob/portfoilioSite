@@ -1,0 +1,108 @@
+---
+/**
+ * What she can be hired for, priced. Naming a starting figure is deliberate:
+ * it filters out the wrong enquiries before either side spends a call on them.
+ */
+import { services, copy } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section class="section section--alt" id="services" aria-labelledby="services-heading">
+  <div class="container">
+    <SectionHeading
+      id="services-heading"
+      time={copy.services.time}
+      eyebrow={copy.services.eyebrow}
+      title={copy.services.title}
+    />
+
+    <ul class="grid">
+      {
+        services.map((service, i) => (
+          <li class="service reveal" style={`--reveal-delay: ${i * 90}ms`}>
+            <h3 class="service__name">{service.name}</h3>
+            <p class="service__description">{service.description}</p>
+
+            <ul class="includes">
+              {service.includes.map((item) => (
+                <li class="includes__item">{item}</li>
+              ))}
+            </ul>
+
+            {service.startingPrice && <p class="service__price">{service.startingPrice}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 720px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .service {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    background-color: var(--surface);
+    border: var(--border-width) solid var(--border);
+    box-shadow: var(--shadow);
+    transition: transform var(--duration) var(--ease-expo-out),
+      box-shadow var(--duration) var(--ease-expo-out);
+  }
+
+  .service:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .service__name {
+    font-size: var(--text-h3);
+  }
+
+  .service__description {
+    color: var(--fg-muted);
+    max-width: var(--measure);
+  }
+
+  .includes {
+    display: grid;
+    gap: var(--space-2);
+    width: 100%;
+    margin-top: var(--space-2);
+  }
+
+  /* A tally mark rather than a bullet — it reads as a checklist of what is
+     actually delivered. */
+  .includes__item {
+    display: flex;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .includes__item::before {
+    content: '—';
+    color: var(--accent-ink);
+    font-weight: 700;
+  }
+
+  .service__price {
+    margin-top: auto;
+    padding-top: var(--space-4);
+    font-family: var(--font-display), Impact, sans-serif;
+    font-size: var(--text-h3);
+    text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+</style>

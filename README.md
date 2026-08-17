@@ -1,9 +1,11 @@
-# Portfolio Site
+# Bhumi Jaiswal — video editor & content strategist
 
-A static personal portfolio built with [Astro](https://astro.build). Compiles to
+A static personal site built with [Astro](https://astro.build). Compiles to
 plain HTML, CSS and a few KB of JavaScript — no server runtime, no framework
 shipped to the browser, deployable to any static host.
 
+- **Click-to-load reel embeds** — nothing from Instagram loads until a visitor
+  presses play, which keeps ~600KB per reel off the initial page
 - Light/dark theme with an explicit toggle that respects the OS preference
 - Self-hosted fonts, so the site makes **zero external network requests**
 - Scroll-reveal motion that fully honours `prefers-reduced-motion`
@@ -49,20 +51,25 @@ What lives there:
 | Export | What it drives |
 | --- | --- |
 | `profile` | Name, title, hero headline, tagline, about paragraphs, stats, email, location |
-| `socials` | GitHub / LinkedIn / email links |
-| `projects` | Project cards — summary, impact, tech, live and repo links |
-| `experience` | Work history timeline |
-| `education` | Degrees, institutions, grades, activities |
-| `skillGroups` | Grouped skill tags |
-| `navLinks` | Nav items (only change if you add or remove sections) |
+| `socials` | Instagram / LinkedIn / email links |
+| `reels` | Work cards — client, format, result, Instagram link, cover image |
+| `services` | What you can be hired for, with starting prices |
+| `processSteps` | Brief-to-posted steps and their turnarounds |
+| `testimonials` | Quotes with name, channel and channel size |
+| `enquiry` | The dropdown options in the contact form |
+| `copy` | Section headings, timecodes, button labels, form labels and errors |
+| `navLinks` | Nav items and their timecodes |
+| `FORM_ENDPOINT` | Set this to post the form somewhere real (see below) |
 
-Two things worth getting right:
+Three things worth getting right:
 
-- **`impact` on each project and `highlights` on each role** should be outcomes,
-  not duties. "Cut p99 latency 40%" beats "worked on performance." These are the
-  lines people actually read.
+- **`result` on each reel** is the line creators actually read. A number beats an
+  adjective: "42k views, 1.8k saves in 5 days" beats "performed really well."
 - **`headline`** is an array, one entry per line. It renders very large, so keep
   it to two or three short words per line.
+- **Leave a `[BRACKET]` in place rather than guessing.** A visible placeholder
+  costs you nothing; an invented client name or view count is the kind of thing
+  a creator checks.
 
 ### 2. Site URL — `astro.config.mjs`
 
@@ -73,10 +80,12 @@ tags.
 site: 'https://yourdomain.com',
 ```
 
-### 3. Favicon and résumé
+### 3. Favicon and reel covers
 
 - `public/favicon.svg` — swap the letter for your own initial.
-- Drop your CV at `public/resume.pdf`, or change `profile.resumeUrl`.
+- Reel covers go in `src/assets/work/` — see the README in that folder. Until a
+  cover is set, the card falls back to a typographic panel, so the site works
+  without them.
 
 ### 4. Colours — `src/styles/global.css`
 
@@ -84,17 +93,29 @@ The accent is defined once per theme. Change these two and the whole site
 follows:
 
 ```css
-:root                      { --accent: #c2410c; }  /* light */
-:root[data-theme='dark']   { --accent: #ff7a45; }  /* dark  */
+:root                      { --accent: #cc3a63; }  /* light */
+:root[data-theme='dark']   { --accent: #ee7f99; }  /* dark  */
 ```
+
+The current palette is cream `#fff7eb` and sand `#f9f0e0` grounds, olive-black
+ink `#1f2416`, a raspberry accent `#cc3a63` and a sage panel colour `#a2ab73`.
 
 Also update the matching value in the `@media (prefers-color-scheme: dark)`
 block — the dark palette is deliberately declared twice so that the OS
 preference and the explicit toggle both resolve correctly. If you only change
 one, the toggle will disagree with the system theme.
 
-**Check contrast after changing.** Accent-on-background must stay at or above
-4.5:1 in both themes.
+**Two rules this palette depends on**, both measured rather than guessed:
+
+- `--accent` is a **fill**, not small text. `#cc3a63` reads 4.54:1 on the cream
+  ground, too close to the line for body copy. Accent-coloured text uses
+  `--accent-ink` (`#a32749`, 6.71:1) instead, and `--accent` only ever carries
+  white text.
+- `--sage` is a **panel ground that takes ink text only** (`--sage-ink`, 6.51:1).
+  Muted (3.41:1) and subtle (2.80:1) text both fail against it.
+
+**Check contrast after changing.** Body text needs 4.5:1, large display type
+3:1, in both themes.
 
 ---
 
@@ -103,23 +124,27 @@ one, the toggle will disagree with the system theme.
 There is no backend. Submitting validates client-side and then opens the
 visitor's email client with the message prefilled.
 
-To use a real form service instead, add an `action` to the `<form>` in
-`src/components/Contact.astro` and delete the `submit` handler at the bottom of
-that file:
+To use a real form service instead, set one constant in `src/data/profile.ts`:
 
-```astro
-<form action="https://formspree.io/f/YOUR_ID" method="POST">
+```ts
+export const FORM_ENDPOINT: string | null = 'https://formspree.io/f/YOUR_ID';
 ```
 
-Netlify Forms works the same way with `netlify` and `name` attributes.
+The form then posts there instead, and the note under the submit button updates
+itself. Client-side validation runs either way. Netlify Forms works the same way
+with `netlify` and `name` attributes on the `<form>`.
 
 ---
 
 ## Fonts
 
-Instrument Serif (display) and Inter (body) are vendored as `latin`-subset
+Archivo Black (display) and Space Grotesk (body) are vendored as `latin`-subset
 `.woff2` files in `src/assets/fonts/` and served through Astro's local font
 provider. Nothing is fetched from Google at build time or at runtime.
+
+Space Grotesk is a single variable file covering weights 400–700, so weight
+changes cost no extra download. Archivo Black ships one weight and is already
+black — there is nothing lighter to add.
 
 This is deliberate: builds stay reproducible and work offline or in a locked-down
 CI, and visitors are never exposed to a third-party font CDN. The tradeoff is
@@ -129,7 +154,7 @@ To add one, drop the `.woff2` into `src/assets/fonts/` and add a variant in
 `astro.config.mjs`:
 
 ```js
-{ weight: 700, style: 'normal', src: ['./src/assets/fonts/inter-latin-700-normal.woff2'] }
+{ weight: 700, style: 'normal', src: ['./src/assets/fonts/your-font-700.woff2'] }
 ```
 
 Files came from the [Fontsource](https://fontsource.org) CDN. Both families are
@@ -175,6 +200,7 @@ src/
   layouts/BaseLayout.astro  meta, JSON-LD, theme bootstrap, scroll observers
   components/             one file per section
   assets/fonts/           self-hosted woff2
+  assets/work/            reel cover images
   pages/index.astro       composes the sections
 public/                   favicon, robots.txt
 ```
@@ -185,6 +211,13 @@ public/                   favicon, robots.txt
 `is:inline` script in `<head>` that applies the saved theme before first paint.
 Without `is:inline`, Astro bundles and defers it, and every page load flashes
 the wrong theme.
+
+**Reel embeds are built on click, never on load.** `Work.astro` renders a cover
+(or a typographic panel) plus a real `<button>`; the `<iframe>` is constructed in
+JavaScript only when that button is pressed. Four Instagram embeds left to load
+on their own weigh roughly 2.4MB, which is most of a visitor's patience spent
+before they have seen a single frame. Check `dist/index.html` after a build — it
+should contain zero `<iframe>` elements.
 
 **Scroll reveal degrades safely.** `.reveal` elements start at `opacity: 0` and
 JavaScript adds `.is-visible`. If JS never runs, the `html.no-js` rule in

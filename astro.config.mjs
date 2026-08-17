@@ -17,11 +17,12 @@ export default defineConfig({
   // To add a weight, drop the .woff2 in and add a variant below.
   fonts: [
     {
-      // Display face — hero and headings only.
+      // Display face — the poster headline voice. Archivo Black ships a single
+      // weight; it is already black, so nothing lighter is needed or wanted.
       provider: fontProviders.local(),
-      name: 'Instrument Serif',
+      name: 'Archivo Black',
       cssVariable: '--font-display',
-      fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+      fallbacks: ['Impact', 'Haettenschweiler', 'sans-serif'],
       // Generates fallback @font-face rules with matching metrics, so swapping
       // from the fallback to the real font doesn't shift the layout.
       optimizedFallbacks: true,
@@ -30,39 +31,25 @@ export default defineConfig({
           {
             weight: 400,
             style: 'normal',
-            src: ['./src/assets/fonts/instrument-serif-latin-400-normal.woff2'],
-          },
-          {
-            weight: 400,
-            style: 'italic',
-            src: ['./src/assets/fonts/instrument-serif-latin-400-italic.woff2'],
+            src: ['./src/assets/fonts/archivo-black-latin-400-normal.woff2'],
           },
         ],
       },
     },
     {
-      // Body face — all reading text, UI labels and navigation.
+      // Body face — all reading text, UI labels and navigation. One variable
+      // file covers 400–700, so weight changes cost no extra download.
       provider: fontProviders.local(),
-      name: 'Inter',
+      name: 'Space Grotesk',
       cssVariable: '--font-body',
-      fallbacks: ['system-ui', 'Segoe UI', 'Helvetica Neue', 'sans-serif'],
+      fallbacks: ['ui-sans-serif', 'system-ui', 'Segoe UI', 'sans-serif'],
       optimizedFallbacks: true,
       options: {
         variants: [
           {
-            weight: 400,
+            weight: '400 700',
             style: 'normal',
-            src: ['./src/assets/fonts/inter-latin-400-normal.woff2'],
-          },
-          {
-            weight: 500,
-            style: 'normal',
-            src: ['./src/assets/fonts/inter-latin-500-normal.woff2'],
-          },
-          {
-            weight: 600,
-            style: 'normal',
-            src: ['./src/assets/fonts/inter-latin-600-normal.woff2'],
+            src: ['./src/assets/fonts/space-grotesk-latin-wght-normal.woff2'],
           },
         ],
       },

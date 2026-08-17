@@ -1,19 +1,26 @@
 ---
 /**
- * Shared section header: small accent eyebrow above a display-face title.
+ * Shared section header: a timecode marker and label above a poster title.
  * `id` is referenced by each section's aria-labelledby.
+ *
+ * The timecode is the page's running order read as a reel — structure drawn
+ * from the work itself rather than a decorative 01 / 02 / 03.
  */
 interface Props {
   id: string;
+  time: string;
   eyebrow: string;
   title: string;
 }
 
-const { id, eyebrow, title } = Astro.props;
+const { id, time, eyebrow, title } = Astro.props;
 ---
 
 <div class="heading reveal">
-  <span class="eyebrow">{eyebrow}</span>
+  <span class="eyebrow">
+    <span class="eyebrow__time">{time}</span>
+    <span>{eyebrow}</span>
+  </span>
   <h2 id={id}>{title}</h2>
 </div>
 

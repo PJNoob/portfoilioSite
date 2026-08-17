@@ -3,7 +3,7 @@
  * The single page shell: fonts, metadata, theme bootstrap, and chrome.
  */
 import { Font } from 'astro:assets';
-import { profile, socials } from '../data/profile';
+import { profile, socials, navLinks, copy } from '../data/profile';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
@@ -20,7 +20,7 @@ const { title = `${profile.name} — ${profile.title}`, description = profile.me
 // a missing config never breaks the build.
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
 
-// Structured data helps search engines render a richer result for your name.
+// Structured data helps search engines render a richer result for her name.
 const personSchema = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -29,6 +29,7 @@ const personSchema = {
   email: `mailto:${profile.email}`,
   url: canonical,
   address: { '@type': 'PostalAddress', addressLocality: profile.location },
+  knowsAbout: ['Video editing', 'Short-form video', 'Content strategy', 'Social media marketing'],
   sameAs: socials.filter((s) => !s.href.startsWith('mailto:')).map((s) => s.href),
 };
 ---
@@ -84,8 +85,28 @@ const personSchema = {
   </head>
 
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{copy.skipLink}</a>
     <Nav />
+
+    {/*
+      The playhead: scroll position read as a timeline, which is the instrument
+      this whole site is about. Decorative — the nav already gives every one of
+      these sections a real, reachable link — so it is hidden from assistive
+      tech and from viewports too narrow to spare the room.
+    */}
+    <div class="playhead" aria-hidden="true" data-playhead>
+      <span class="playhead__fill" data-playhead-fill></span>
+      <ul class="playhead__marks">
+        {
+          navLinks.map((link) => (
+            <li class="playhead__mark" data-playhead-mark={link.href}>
+              <span class="playhead__time">{link.time}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
     <main id="main">
       <slot />
     </main>
@@ -93,7 +114,8 @@ const personSchema = {
 
     <script>
       // ---------------------------------------------------------------------
-      // Scroll reveal + scrollspy. Astro bundles, minifies and defers this.
+      // Scroll reveal + scrollspy + playhead. Astro bundles, minifies and
+      // defers this.
       // ---------------------------------------------------------------------
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -124,6 +146,7 @@ const personSchema = {
       const navLinkEls = Array.from(
         document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]')
       );
+      const marks = Array.from(document.querySelectorAll<HTMLElement>('[data-playhead-mark]'));
       const sections = navLinkEls
         .map((link) => document.querySelector<HTMLElement>(link.hash))
         .filter((el): el is HTMLElement => el !== null);
@@ -138,6 +161,9 @@ const personSchema = {
             } else {
               link.removeAttribute('aria-current');
             }
+          }
+          for (const mark of marks) {
+            mark.classList.toggle('is-active', mark.dataset.playheadMark === `#${id}`);
           }
         };
 
@@ -155,6 +181,79 @@ const personSchema = {
         );
         sections.forEach((section) => spyObserver.observe(section));
       }
+
+      // --- Playhead fill: how far through the page you are ---
+      const fill = document.querySelector<HTMLElement>('[data-playhead-fill]');
+
+      if (fill) {
+        const syncPlayhead = () => {
+          const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
+          fill.style.setProperty('--progress', String(Math.min(1, Math.max(0, progress))));
+        };
+        syncPlayhead();
+        window.addEventListener('scroll', syncPlayhead, { passive: true });
+        window.addEventListener('resize', syncPlayhead, { passive: true });
+      }
     </script>
+
+    <style>
+      .playhead {
+        position: fixed;
+        top: 50%;
+        right: clamp(0.75rem, 2vw, 1.5rem);
+        z-index: 90;
+        display: none;
+        grid-template-columns: auto auto;
+        align-items: stretch;
+        gap: var(--space-3);
+        height: 44vh;
+        transform: translateY(-50%);
+      }
+
+      /* Only shown where there is room beside the 72rem container. Below that
+         it would sit on top of the content it is describing. */
+      @media (min-width: 1240px) {
+        .playhead {
+          display: grid;
+        }
+      }
+
+      /* The track itself, with the played portion filled from the top. */
+      .playhead__fill {
+        position: relative;
+        width: var(--border-width);
+        background-color: var(--border);
+        opacity: 0.25;
+      }
+
+      .playhead__fill::after {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: calc(var(--progress, 0) * 100%);
+        background-color: var(--accent);
+        opacity: 1;
+      }
+
+      .playhead__marks {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .playhead__time {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--fg-subtle);
+        font-variant-numeric: tabular-nums;
+        transition: color var(--duration-fast) var(--ease-quart-out);
+      }
+
+      .playhead__mark.is-active .playhead__time {
+        color: var(--accent-ink);
+      }
+    </style>
   </body>
 </html>

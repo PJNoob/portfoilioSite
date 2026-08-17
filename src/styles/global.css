@@ -12,46 +12,61 @@
 
    Defining a colour only inside a media query would break the toggle, so
    every token gets its base value on plain `:root` first.
+
+   Colour rules this palette imposes, measured rather than guessed:
+     - `--accent` (#CC3A63) is a FILL, never small text on a warm ground: it
+       reads 4.54:1 on cream, which is too close to the line. Accent-coloured
+       text uses `--accent-ink` (#A32749, 6.71:1 on cream) instead.
+     - `--sage` is a panel ground that only ever carries `--sage-ink`
+       (6.51:1). Muted (3.41:1) and subtle (2.80:1) text both fail on it.
    ========================================================================== */
 
 :root {
   /* --- Colour: light ---------------------------------------------------- */
-  /* Warm off-white and off-black rather than pure #fff / #000, which read
-     flat and harsh on a screen. */
-  --bg: #fafaf9;
-  --bg-elevated: #f4f3f1;
+  /* Cream and sand grounds, ink drawn from the deep end of the sage family so
+     the page reads as one palette rather than warm tones plus a black. */
+  --bg: #fff7eb;
+  --bg-elevated: #f9f0e0;
   --surface: #ffffff;
-  --fg: #0a0a0a;
-  --fg-muted: #57534e;
-  --fg-subtle: #78716c;
-  --border: #e0ddd8;
-  --border-strong: #c9c4bc;
-  --accent: #c2410c;
+  --fg: #1f2416;
+  --fg-muted: #4a5138;
+  --fg-subtle: #565e42;
+  --border: #1f2416;
+  --border-strong: #1f2416;
+  --accent: #cc3a63;
+  --accent-ink: #a32749;
   --accent-contrast: #ffffff;
-  --accent-wash: rgba(194, 65, 12, 0.08);
-  --shadow: 0 1px 2px rgba(10, 10, 10, 0.04), 0 8px 24px rgba(10, 10, 10, 0.06);
+  --accent-wash: rgba(204, 58, 99, 0.12);
+  --sage: #a2ab73;
+  --sage-ink: #1f2416;
+
+  /* Hard offset shadows, not blurs. The whole construction is flat planes
+     with ink outlines; a soft shadow would read as a different design. */
+  --shadow: 4px 4px 0 var(--border);
+  --shadow-lg: 6px 6px 0 var(--border);
+  --border-width: 2px;
 
   /* --- Typography ------------------------------------------------------- */
-  /* --font-display (Instrument Serif) and --font-body (Inter) are injected
-     by Astro's Fonts API; see astro.config.mjs. */
+  /* --font-display (Archivo Black) and --font-body (Space Grotesk) are
+     injected by Astro's Fonts API; see astro.config.mjs. */
 
-  /* Fluid scale. The hero-to-body ratio is roughly 10:1 at desktop widths —
-     that contrast is the whole point of the design. */
-  --text-hero: clamp(3.25rem, 13vw, 10.5rem);
-  --text-h2: clamp(2rem, 5.5vw, 3.75rem);
-  --text-h3: clamp(1.25rem, 2.2vw, 1.6rem);
-  --text-lead: clamp(1.05rem, 1.8vw, 1.3rem);
+  /* Archivo Black is a wide, heavy face — it needs a lower ceiling and a
+     gentler vw slope than a condensed serif would, or the hero overflows. */
+  --text-hero: clamp(2.5rem, 9vw, 6.5rem);
+  --text-h2: clamp(1.75rem, 4.5vw, 3rem);
+  --text-h3: clamp(1.15rem, 1.9vw, 1.4rem);
+  --text-lead: clamp(1.05rem, 1.8vw, 1.25rem);
   --text-body: 1.0625rem; /* 17px */
   --text-sm: 0.9375rem;
   --text-xs: 0.8125rem;
 
-  --leading-tight: 0.92;
-  --leading-snug: 1.25;
-  --leading-body: 1.65;
+  --leading-tight: 0.9;
+  --leading-snug: 1.2;
+  --leading-body: 1.6;
 
-  --tracking-display: -0.03em;
-  --tracking-tight: -0.015em;
-  --tracking-wide: 0.08em;
+  --tracking-display: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-wide: 0.1em;
 
   /* --- Spacing ---------------------------------------------------------- */
   --space-1: 0.25rem;
@@ -63,15 +78,17 @@
   --space-7: 3rem;
   --space-8: 4rem;
   --space-9: 6rem;
-  --space-section: clamp(4.5rem, 11vh, 8rem);
+  --space-section: clamp(4rem, 10vh, 7rem);
 
-  --radius-sm: 4px;
-  --radius: 8px;
-  --radius-lg: 16px;
-  --radius-pill: 999px;
+  /* Square by design. Rounded corners soften exactly the edge this style
+     depends on, so every radius token resolves to 0. */
+  --radius-sm: 0px;
+  --radius: 0px;
+  --radius-lg: 0px;
+  --radius-pill: 0px;
 
   --container: 72rem;
-  --measure: 62ch;
+  --measure: 60ch;
 
   /* --- Motion ----------------------------------------------------------- */
   /* Custom curves only. The browser defaults (`ease`, `linear`) read
@@ -79,9 +96,9 @@
   --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-quart-out: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-expo-in-out: cubic-bezier(0.87, 0, 0.13, 1);
-  --duration-fast: 180ms;
-  --duration: 420ms;
-  --duration-slow: 900ms;
+  --duration-fast: 150ms;
+  --duration: 380ms;
+  --duration-slow: 820ms;
 
   --header-height: 4.5rem;
 }
@@ -89,36 +106,44 @@
 /* Dark palette — OS preference, unless the user explicitly chose light. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0a0a0a;
-    --bg-elevated: #141413;
-    --surface: #1a1a18;
-    --fg: #fafaf9;
-    --fg-muted: #a8a29e;
-    --fg-subtle: #8a8580;
-    --border: #2a2a27;
-    --border-strong: #3d3d39;
-    --accent: #ff7a45;
-    --accent-contrast: #0a0a0a;
-    --accent-wash: rgba(255, 122, 69, 0.1);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+    --bg: #161a10;
+    --bg-elevated: #222819;
+    --surface: #222819;
+    --fg: #fff7eb;
+    --fg-muted: #c3c6ae;
+    --fg-subtle: #9aa184;
+    --border: #fff7eb;
+    --border-strong: #fff7eb;
+    --accent: #ee7f99;
+    --accent-ink: #ee7f99;
+    --accent-contrast: #161a10;
+    --accent-wash: rgba(238, 127, 153, 0.16);
+    --sage: #a2ab73;
+    --sage-ink: #161a10;
+    --shadow: 4px 4px 0 var(--border);
+    --shadow-lg: 6px 6px 0 var(--border);
   }
 }
 
 /* Dark palette — explicit user choice. Must be a separate block so it also
    wins when the OS is set to light. */
 :root[data-theme='dark'] {
-  --bg: #0a0a0a;
-  --bg-elevated: #141413;
-  --surface: #1a1a18;
-  --fg: #fafaf9;
-  --fg-muted: #a8a29e;
-  --fg-subtle: #8a8580;
-  --border: #2a2a27;
-  --border-strong: #3d3d39;
-  --accent: #ff7a45;
-  --accent-contrast: #0a0a0a;
-  --accent-wash: rgba(255, 122, 69, 0.1);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --bg: #161a10;
+  --bg-elevated: #222819;
+  --surface: #222819;
+  --fg: #fff7eb;
+  --fg-muted: #c3c6ae;
+  --fg-subtle: #9aa184;
+  --border: #fff7eb;
+  --border-strong: #fff7eb;
+  --accent: #ee7f99;
+  --accent-ink: #ee7f99;
+  --accent-contrast: #161a10;
+  --accent-wash: rgba(238, 127, 153, 0.16);
+  --sage: #a2ab73;
+  --sage-ink: #161a10;
+  --shadow: 4px 4px 0 var(--border);
+  --shadow-lg: 6px 6px 0 var(--border);
 }
 
 /* ==========================================================================
@@ -143,7 +168,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--fg);
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--text-body);
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
@@ -156,9 +181,15 @@ body {
 
 img,
 svg,
-video {
+video,
+iframe {
   display: block;
   max-width: 100%;
+}
+
+img,
+svg,
+video {
   height: auto;
 }
 
@@ -187,11 +218,18 @@ a {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 400;
+  font-family: var(--font-display), Impact, sans-serif;
+  font-weight: 400; /* Archivo Black ships one weight, and it is already black. */
   letter-spacing: var(--tracking-display);
   line-height: var(--leading-tight);
   text-wrap: balance;
+}
+
+/* Section titles are set as posters. h3 stays sentence case — uppercasing
+   every card title turns the page into shouting. */
+h1,
+h2 {
+  text-transform: uppercase;
 }
 
 h2 {
@@ -220,9 +258,8 @@ p {
 /* Visible AND on-brand. Keyboard users get a clear target without the ring
    showing up on every mouse click. */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 3px solid var(--accent-ink);
   outline-offset: 3px;
-  border-radius: var(--radius-sm);
 }
 
 :focus:not(:focus-visible) {
@@ -242,6 +279,13 @@ p {
 
 .section {
   padding-block: var(--space-section);
+}
+
+/* Alternating grounds give the page rhythm without adding ornament. The ink
+   rule at the seam is what keeps the change of colour looking deliberate. */
+.section--alt {
+  background-color: var(--bg-elevated);
+  border-block: var(--border-width) solid var(--border);
 }
 
 /* Screen-reader-only, but focusable when needed (used by the skip link). */
@@ -265,9 +309,9 @@ p {
   padding: var(--space-3) var(--space-5);
   background-color: var(--accent);
   color: var(--accent-contrast);
-  border-radius: var(--radius);
+  border: var(--border-width) solid var(--border);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
   /* Off-screen until focused, rather than display:none, so it stays reachable. */
   transform: translateY(-200%);
   transition: transform var(--duration-fast) var(--ease-quart-out);
@@ -277,15 +321,24 @@ p {
   transform: translateY(0);
 }
 
-/* Small uppercase label used above every section heading. */
+/* Timecode eyebrow. The running time is real structure for someone whose
+   craft is a timeline — it reads as a position in a reel, not decoration. */
 .eyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-ink);
   margin-bottom: var(--space-3);
+}
+
+.eyebrow__time {
+  padding: 2px var(--space-2);
+  border: var(--border-width) solid currentColor;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ==========================================================================
@@ -298,41 +351,42 @@ p {
   justify-content: center;
   gap: var(--space-2);
   /* min-height keeps tap targets at the 44px accessibility minimum. */
-  min-height: 44px;
+  min-height: 48px;
   padding: var(--space-3) var(--space-5);
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
+  border: var(--border-width) solid var(--border);
   background-color: var(--accent);
   color: var(--accent-contrast);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  box-shadow: var(--shadow);
   cursor: pointer;
-  /* transform + opacity only, so hover stays on the compositor at 60fps. */
+  /* transform + box-shadow only, so the press stays cheap to animate. */
   transition: transform var(--duration-fast) var(--ease-quart-out),
-    opacity var(--duration-fast) var(--ease-quart-out),
-    background-color var(--duration-fast) var(--ease-quart-out),
-    border-color var(--duration-fast) var(--ease-quart-out);
+    box-shadow var(--duration-fast) var(--ease-quart-out),
+    background-color var(--duration-fast) var(--ease-quart-out);
 }
 
 .button:hover {
-  transform: translateY(-2px);
-  opacity: 0.92;
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lg);
 }
 
+/* The shadow collapses under the button: it reads as physically pressed. */
 .button:active {
-  transform: translateY(0);
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--border);
 }
 
 .button--ghost {
-  background-color: transparent;
+  background-color: var(--surface);
   color: var(--fg);
-  border-color: var(--border-strong);
 }
 
 .button--ghost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  opacity: 1;
+  background-color: var(--sage);
+  color: var(--sage-ink);
 }
 
 /* ==========================================================================
@@ -343,7 +397,7 @@ p {
 
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(20px);
   transition: opacity var(--duration-slow) var(--ease-expo-out),
     transform var(--duration-slow) var(--ease-expo-out);
   /* Staggered children set --reveal-delay inline. */

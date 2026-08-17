@@ -1,38 +1,37 @@
 ---
-import { profile } from '../data/profile';
+/**
+ * Written as "why is this person safe to hand a channel to", not as a
+ * biography. The numbers sit beside the prose because they are the part a
+ * creator checks first.
+ */
+import { profile, copy } from '../data/profile';
 import SectionHeading from './SectionHeading.astro';
 ---
 
 <section class="section" id="about" aria-labelledby="about-heading">
   <div class="container">
-    <SectionHeading id="about-heading" eyebrow="About" title="A little background" />
+    <SectionHeading
+      id="about-heading"
+      time={copy.about.time}
+      eyebrow={copy.about.eyebrow}
+      title={copy.about.title}
+    />
 
     <div class="about">
       <div class="about__body reveal">
         {profile.about.map((paragraph) => <p>{paragraph}</p>)}
       </div>
 
-      <aside class="about__aside reveal" style="--reveal-delay: 120ms">
-        {/* Inline SVG monogram — no external image to load or hotlink.
-            Replace with an <img> of a real photo if you prefer. */}
-        <div class="monogram" role="img" aria-label={`${profile.name} monogram`}>
-          <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-            <rect width="120" height="120" rx="12" class="monogram__bg"></rect>
-            <text x="60" y="62" class="monogram__text">{profile.initials}</text>
-          </svg>
-        </div>
-
-        <dl class="stats">
-          {
-            profile.highlights.map((item) => (
-              <div class="stats__item">
-                <dt class="stats__label">{item.label}</dt>
-                <dd class="stats__value">{item.value}</dd>
-              </div>
-            ))
-          }
-        </dl>
-      </aside>
+      <dl class="stats reveal" style="--reveal-delay: 120ms">
+        {
+          profile.highlights.map((item) => (
+            <div class="stats__item">
+              <dt class="stats__label">{item.label}</dt>
+              <dd class="stats__value">{item.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
     </div>
   </div>
 </section>
@@ -65,51 +64,44 @@ import SectionHeading from './SectionHeading.astro';
     color: var(--fg-muted);
   }
 
-  .about__aside {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-6);
-  }
-
-  .monogram {
-    width: clamp(6rem, 18vw, 8.5rem);
-  }
-
-  .monogram__bg {
-    fill: var(--accent-wash);
-    stroke: var(--border);
-  }
-
-  .monogram__text {
-    font-family: var(--font-display), Georgia, serif;
-    font-size: 44px;
-    text-anchor: middle;
-    dominant-baseline: middle;
-    fill: var(--accent);
-  }
-
   .stats {
     display: grid;
-    gap: var(--space-4);
+    gap: 0;
+    border: var(--border-width) solid var(--border);
+    background-color: var(--surface);
+    box-shadow: var(--shadow);
   }
 
   .stats__item {
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border);
+    padding: var(--space-5);
   }
 
+  .stats__item + .stats__item {
+    border-top: var(--border-width) solid var(--border);
+  }
+
+  /* The number leads and the label explains it, so the number is set first in
+     the visual order even though the label comes first in the markup — a <dl>
+     needs its <dt> before its <dd> to stay valid. */
   .stats__value {
-    font-family: var(--font-display), Georgia, serif;
-    font-size: 1.75rem;
-    line-height: 1.1;
-    letter-spacing: var(--tracking-tight);
+    font-family: var(--font-display), Impact, sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1;
+    letter-spacing: var(--tracking-display);
+    color: var(--accent-ink);
   }
 
   .stats__label {
+    order: 2;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
     color: var(--fg-subtle);
-    margin-bottom: var(--space-2);
+    margin-top: var(--space-2);
+  }
+
+  .stats__item {
+    display: flex;
+    flex-direction: column;
   }
 </style>
