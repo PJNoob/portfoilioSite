@@ -6,7 +6,7 @@ export default defineConfig({
   // CUSTOMIZE: set this to your real deployed URL. It powers canonical links
   // and Open Graph tags. Deploying to a root domain (Netlify / Vercel /
   // Cloudflare) needs no `base`; see README.md for GitHub Pages.
-  site: 'https://example.com',
+  site: 'https://portfoilio-site.jaiswalpratham1234.workers.dev',
 
   // Fonts are vendored into src/assets/fonts/ and served from the local
   // provider rather than fetched from Google at build time. That keeps builds

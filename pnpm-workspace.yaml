@@ -1,4 +1,6 @@
-# esbuild ships a platform-specific binary via its postinstall script, which
-# pnpm blocks by default. Astro's bundler needs it, so allow it explicitly.
+# esbuild and workerd ship platform-specific binaries via their postinstall
+# scripts, which pnpm blocks by default. Astro's bundler needs esbuild, and
+# Wrangler needs workerd for local emulation and deploys, so allow both.
 allowBuilds:
   esbuild: true
+  workerd: true
