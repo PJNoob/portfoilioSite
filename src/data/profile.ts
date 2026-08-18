@@ -74,7 +74,7 @@ export interface Service {
 }
 
 export interface ProcessStep {
-  /** Running order, shown as a timecode-style marker. */
+  /** Running order, shown as a numbered marker, e.g. "01". */
   step: string;
   title: string;
   detail: string;
@@ -312,16 +312,16 @@ export const testimonials: Testimonial[] = [
 /* -------------------------------------------------------------------------- */
 
 /**
- * `time` is the timecode marker shown beside each section heading and on the
- * scroll playhead — the running order of the page, read as a reel.
+ * The running order of the page. `href` doubles as the id of the section the
+ * scrub rail measures, so no position on the rail is ever written by hand.
  */
 export const navLinks = [
-  { href: '#work', label: 'Work', time: '00:04' },
-  { href: '#services', label: 'Services', time: '00:22' },
-  { href: '#process', label: 'Process', time: '00:41' },
-  { href: '#words', label: 'Words', time: '01:03' },
-  { href: '#about', label: 'About', time: '01:18' },
-  { href: '#contact', label: 'Contact', time: '01:32' },
+  { href: '#work', label: 'Work' },
+  { href: '#services', label: 'Services' },
+  { href: '#process', label: 'Process' },
+  { href: '#words', label: 'Words' },
+  { href: '#about', label: 'About' },
+  { href: '#contact', label: 'Contact' },
 ] as const;
 
 /* -------------------------------------------------------------------------- */
@@ -362,9 +362,6 @@ export const enquiry = {
  * Headings, buttons and labels. These live here for the same reason the rest
  * of the copy does: changing what the site says should never mean opening a
  * component and hunting for a string between the markup and the CSS.
- *
- * `time` is the timecode marker beside each heading — the running order of the
- * page, read as a reel. Keep it in step with `navLinks`.
  */
 export const copy = {
   hero: {
@@ -373,7 +370,6 @@ export const copy = {
     stripLabel: 'Formats I cut',
   },
   work: {
-    time: '00:04',
     eyebrow: 'The work',
     title: 'Stuff I cut',
     openLink: 'Open on Instagram',
@@ -381,27 +377,22 @@ export const copy = {
     ctaButton: 'Start a project',
   },
   services: {
-    time: '00:22',
     eyebrow: 'What I do',
     title: 'Hire me for',
   },
   process: {
-    time: '00:41',
     eyebrow: 'How it runs',
     title: 'Brief to posted',
   },
   testimonials: {
-    time: '01:03',
     eyebrow: 'Receipts',
     title: 'Bragging rights',
   },
   about: {
-    time: '01:18',
     eyebrow: 'The person',
     title: "Who you're hiring",
   },
   contact: {
-    time: '01:32',
     eyebrow: 'Say hi',
     title: "Let's talk",
     lead: "Send me a reel you wish had done better, or just say what you're making. I reply to everything that isn't a bulk pitch.",
@@ -439,4 +430,13 @@ export const copy = {
     backToTop: 'Back to top',
   },
   skipLink: 'Skip to content',
+  /**
+   * The scrub rail down the right-hand side. `intro` names the hero, which the
+   * header nav leaves out because the wordmark already covers "back to top" —
+   * but the rail draws the whole reel, so it needs a first stop.
+   */
+  rail: {
+    label: 'Timeline',
+    intro: 'Intro',
+  },
 } as const;

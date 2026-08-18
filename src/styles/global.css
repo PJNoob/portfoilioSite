@@ -103,6 +103,15 @@
   --header-height: 4.5rem;
 }
 
+/* How far through the page the reader is, 0 to 1. Written by the scrub rail's
+   scroll handler and read by everything that has to move with it. Registered so
+   it is typed as a number rather than an unparsed token. */
+@property --progress {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 /* Dark palette — OS preference, unless the user explicitly chose light. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
@@ -321,24 +330,15 @@ p {
   transform: translateY(0);
 }
 
-/* Timecode eyebrow. The running time is real structure for someone whose
-   craft is a timeline — it reads as a position in a reel, not decoration. */
+/* Section eyebrow: the small label above a poster title. */
 .eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
+  display: inline-block;
   font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--accent-ink);
   margin-bottom: var(--space-3);
-}
-
-.eyebrow__time {
-  padding: 2px var(--space-2);
-  border: var(--border-width) solid currentColor;
-  font-variant-numeric: tabular-nums;
 }
 
 /* ==========================================================================
