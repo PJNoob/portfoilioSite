@@ -1,0 +1,85 @@
+---
+/**
+ * The section that answers the fear behind every enquiry: will you miss my
+ * upload date? Laying out each step of the process builds that confidence.
+ *
+ * The numbering here is earned: this genuinely is a sequence, and the order
+ * is information the reader needs.
+ */
+import { processSteps, copy } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section class="section" id="process" aria-labelledby="process-heading">
+  <div class="container">
+    <SectionHeading
+      id="process-heading"
+      eyebrow={copy.process.eyebrow}
+      title={copy.process.title}
+    />
+
+    <ol class="track">
+      {
+        processSteps.map((step, i) => (
+          <li class="step reveal" style={`--reveal-delay: ${i * 100}ms`}>
+            <span class="step__number" aria-hidden="true">
+              {step.step}
+            </span>
+            <h3 class="step__title">{step.title}</h3>
+            <p class="step__detail">{step.detail}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .track {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 720px) {
+    .track {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .track {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    /* Butted together with shared ink edges, the four steps read as one strip
+       of film rather than four separate cards. */
+    .step + .step {
+      border-left: 0;
+    }
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background-color: var(--surface);
+    border: var(--border-width) solid var(--border);
+  }
+
+  .step__number {
+    font-family: var(--font-display), Impact, sans-serif;
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .step__detail {
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+  }
+
+</style>

@@ -3,8 +3,9 @@
  * The single page shell: fonts, metadata, theme bootstrap, and chrome.
  */
 import { Font } from 'astro:assets';
-import { profile, socials } from '../data/profile';
+import { profile, socials, copy } from '../data/profile';
 import Nav from '../components/Nav.astro';
+import ScrubRail from '../components/ScrubRail.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
@@ -20,7 +21,7 @@ const { title = `${profile.name} — ${profile.title}`, description = profile.me
 // a missing config never breaks the build.
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
 
-// Structured data helps search engines render a richer result for your name.
+// Structured data helps search engines render a richer result for her name.
 const personSchema = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -29,6 +30,7 @@ const personSchema = {
   email: `mailto:${profile.email}`,
   url: canonical,
   address: { '@type': 'PostalAddress', addressLocality: profile.location },
+  knowsAbout: ['Video editing', 'Short-form video', 'Content strategy', 'Social media marketing'],
   sameAs: socials.filter((s) => !s.href.startsWith('mailto:')).map((s) => s.href),
 };
 ---
@@ -84,8 +86,10 @@ const personSchema = {
   </head>
 
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{copy.skipLink}</a>
     <Nav />
+    <ScrubRail />
+
     <main id="main">
       <slot />
     </main>
@@ -94,6 +98,7 @@ const personSchema = {
     <script>
       // ---------------------------------------------------------------------
       // Scroll reveal + scrollspy. Astro bundles, minifies and defers this.
+      // The scrub rail runs its own script; see components/ScrubRail.astro.
       // ---------------------------------------------------------------------
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

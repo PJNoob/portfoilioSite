@@ -11,68 +11,104 @@
  * Search for "[" to find everything still left to fill in.
  */
 
+import type { ImageMetadata } from 'astro';
+import showreelPoster01 from '../assets/showreel/showreel-01.jpg';
+import showreelPoster02 from '../assets/showreel/showreel-02.jpg';
+import showreelPoster03 from '../assets/showreel/showreel-03.jpg';
+import showreelPoster04 from '../assets/showreel/showreel-04.jpg';
+import showreelPoster05 from '../assets/showreel/showreel-05.jpg';
+import showreelPoster06 from '../assets/showreel/showreel-06.jpg';
+import showreelPoster07 from '../assets/showreel/showreel-07.jpg';
+import showreelPoster08 from '../assets/showreel/showreel-08.jpg';
+
 /* -------------------------------------------------------------------------- */
 /* Types                                                                       */
 /* -------------------------------------------------------------------------- */
 
 export interface SocialLink {
-  /** Visible label, e.g. "GitHub". */
+  /** Visible label, e.g. "Instagram". */
   label: string;
   /** Full URL. Use a `mailto:` URL for email. */
   href: string;
-  /** Short handle shown next to the label, e.g. "@octocat". */
+  /** Short handle shown next to the label, e.g. "@bhumiii_editsss". */
   handle: string;
 }
 
-export interface Project {
-  name: string;
-  /** One sentence: what it is and what you did. */
-  summary: string;
-  /**
-   * The outcome that proves it mattered — users, latency, adoption, revenue.
-   * This is the line recruiters actually read, so make it concrete.
-   */
-  impact: string;
-  /** Technologies used, rendered as chips. */
-  tech: string[];
-  /** Live demo URL. Set to `null` to hide the button. */
-  liveUrl: string | null;
-  /** Source repository URL. Set to `null` to hide the button. */
-  repoUrl: string | null;
-  /** Mark one or two as featured to give them a wider grid cell. */
-  featured?: boolean;
-}
-
-export interface Role {
+export interface Reel {
+  /** Short name for the piece — what it was about, not a file name. */
   title: string;
-  company: string;
-  location: string;
-  /** Machine-readable start date (YYYY-MM) for the <time> element. */
-  startDate: string;
-  /** Machine-readable end date (YYYY-MM), or null if this is your current role. */
-  endDate: string | null;
-  /** Human-readable range, e.g. "Jan 2024 — Present". */
-  dateLabel: string;
-  /** Achievements phrased as outcomes, not duties. Aim for 2–3. */
-  highlights: string[];
-  tech: string[];
+  /** Whose channel it went out on. */
+  client: string;
+  /** Audience size at the time, e.g. "20k followers". */
+  clientSize: string;
+  /** Where it ran and in what shape, e.g. "Instagram Reel". */
+  format: string;
+  /** Niche / treatment chips shown under the title. */
+  tags: string[];
+  /**
+   * The number that proves it worked — views, saves, follows, watch-through.
+   * This is the line a creator actually reads. Set to `null` to hide it.
+   */
+  result: string | null;
+  /** Public permalink, used for the "open on Instagram" link. */
+  url: string;
+  /**
+   * The Instagram shortcode from the permalink — the part after /reel/.
+   * The embed is built from this and only loads once someone clicks play.
+   */
+  embedCode: string;
+  /**
+   * Cover frame. Drop a portrait screenshot into `src/assets/work/`, import it
+   * at the top of this file, and set it here:
+   *
+   *   import reelOne from '../assets/work/reel-one.jpg';
+   *   ...
+   *   cover: reelOne,
+   *
+   * Left as `null`, the card falls back to a typographic panel — the site
+   * still works, it just carries less punch.
+   */
+  cover: ImageMetadata | null;
 }
 
-export interface Education {
-  degree: string;
-  institution: string;
-  location: string;
-  dateLabel: string;
-  /** GPA, classification or percentage. Set to null to omit. */
-  grade: string | null;
-  /** Coursework, societies, positions of responsibility. */
-  activities: string[];
+export interface ShowreelClip {
+  /** Not displayed — used only as the tile's accessible name. */
+  title: string;
+  /** width / height, e.g. 0.5625 for 9:16, 1 for square, 1.78 for 16:9. */
+  aspect: number;
+  /**
+   * Animated WebP under public/, e.g. '/videos/showreel-01.webp'. Rendered as
+   * a plain <img> — an animated image always plays, in every browser, with
+   * no autoplay permission and no risk of the browser suspending it once
+   * it's off-screen, unlike a <video autoplay> element.
+   */
+  src: string;
+  /** First-frame poster, imported like Reel.cover — also the reduced-motion fallback frame. */
+  poster: ImageMetadata;
 }
 
-export interface SkillGroup {
-  /** Category name, e.g. "Languages". */
+export interface Service {
   name: string;
-  items: string[];
+  /** One sentence on what the client actually gets. */
+  description: string;
+  /** Concrete deliverables, not adjectives. */
+  includes: string[];
+}
+
+export interface ProcessStep {
+  /** Running order, shown as a numbered marker, e.g. "01". */
+  step: string;
+  title: string;
+  detail: string;
+}
+
+export interface Testimonial {
+  quote: string;
+  name: string;
+  /** Their channel or handle. */
+  channel: string;
+  /** Audience size, e.g. "20k followers". */
+  channelSize: string;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -80,43 +116,47 @@ export interface SkillGroup {
 /* -------------------------------------------------------------------------- */
 
 export const profile = {
-  name: '[YOUR NAME]',
+  name: 'Bhumi Jaiswal',
   /** Used for the inline SVG avatar. Two letters works best. */
-  initials: '[]',
+  initials: 'BJ',
   /** Your professional title — shown under the hero headline. */
-  title: '[Your Professional Title]',
+  title: 'Video editor & content strategist',
 
   /**
    * The hero headline. Kept deliberately short: this is set very large, and
    * 2–4 words per line is what makes the typography land.
    */
-  headline: ['Software', 'Engineer.'],
+  headline: ['Reels', 'worth the', 'rewatch.'],
 
   /** One line under the headline that says what makes you different. */
   tagline:
-    '[One sentence on what you build and why it matters — the line that makes someone keep reading.]',
+    'I cut daily vlogs, educational and motivational content for creators — and help plan what goes out next.',
 
   /** Used for <meta name="description"> and Open Graph. Aim for ~155 chars. */
   metaDescription:
-    '[Your Name] is a [your title] who [what you do]. Portfolio, work history and contact details.',
+    'Bhumi Jaiswal edits reels, vlogs and educational content for creators, and runs the channel marketing around them. Selected work, services and contact.',
 
-  location: '[City, Country]',
-  email: '[you@example.com]',
-  /** Path or URL to your CV. Drop a PDF in `public/` and point here. */
-  resumeUrl: '/resume.pdf',
+  location: 'Delhi NCR, India',
+  email: 'bhumijaiswal31aa@gmail.com',
 
   /** About section — each string renders as its own paragraph. */
   about: [
-    "[Open with what you actually do and who you do it for. Two sentences. Avoid 'passionate about technology' — say what you build instead.]",
-    '[Second paragraph: the thread running through your work. What kinds of problems pull you in, and what have you learned from solving them?]',
-    '[Third paragraph, optional: what you are looking for now, plus a touch of personality so you read as a person rather than a résumé.]',
+    'I edit short-form video for creators — daily lifestyle and vlog content, educational explainers, motivational cuts, and whatever the trend cycle is asking for that week.',
+    'The editing is half of it. I also work on what goes out and when: reading the niche, watching what the audience actually responds to, and shaping the posting and marketing around it. A well-cut reel that nobody planned a rollout for is a wasted afternoon.',
+    'So far that has meant a year of editing and marketing across ten creators, including channels at 20k and 10k. I am taking on new creators now — if you post consistently and want the edit to stop being the bottleneck, send me a reel you wish had done better.',
   ],
+
+  /**
+   * The three panels in the hero. These are the kinds of video you actually
+   * cut — they double as the first thing a creator checks for a fit.
+   */
+  heroPanels: ['Vlogs', 'Educational', 'Trends'],
 
   /** Small stat row under the About text. Keep to three — it reads cleanest. */
   highlights: [
-    { value: '[N]+', label: 'Years building software' },
-    { value: '[N]+', label: 'Projects shipped' },
-    { value: '[N]+', label: 'Open source contributions' },
+    { value: '10', label: 'Creators worked with' },
+    { value: '20K+', label: 'Views delivered' },
+    { value: '1 yr', label: 'Editing and marketing' },
   ],
 } as const;
 
@@ -125,145 +165,175 @@ export const profile = {
 /* -------------------------------------------------------------------------- */
 
 export const socials: SocialLink[] = [
-  { label: 'GitHub', href: 'https://github.com/[username]', handle: '@[username]' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/[username]', handle: '/in/[username]' },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/bhumiii_editsss/',
+    handle: '@bhumiii_editsss',
+  },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/bhumi-jaiswal-609615321/',
+    handle: '/in/bhumi-jaiswal',
+  },
   { label: 'Email', href: `mailto:${profile.email}`, handle: profile.email },
 ];
 
 /* -------------------------------------------------------------------------- */
-/* Projects — the section hiring managers scan first                           */
-/* -------------------------------------------------------------------------- */
-
-export const projects: Project[] = [
-  {
-    name: '[Project One]',
-    summary:
-      '[What it is in one sentence, and specifically what you built. If it was a team project, say which parts were yours.]',
-    impact: '[The measurable result — e.g. "Serving 12k monthly users at p99 under 200ms."]',
-    tech: ['TypeScript', 'React', 'PostgreSQL'],
-    liveUrl: 'https://example.com',
-    repoUrl: 'https://github.com/[username]/[repo]',
-    featured: true,
-  },
-  {
-    name: '[Project Two]',
-    summary: '[What problem it solves and the interesting technical decision you made.]',
-    impact: '[e.g. "Cut build times from 9 minutes to 90 seconds across 40 engineers."]',
-    tech: ['Go', 'Redis', 'Docker'],
-    liveUrl: null,
-    repoUrl: 'https://github.com/[username]/[repo]',
-  },
-  {
-    name: '[Project Three]',
-    summary: '[What it does and why you built it.]',
-    impact: '[e.g. "300+ GitHub stars; adopted by three teams internally."]',
-    tech: ['Python', 'FastAPI', 'AWS'],
-    liveUrl: 'https://example.com',
-    repoUrl: 'https://github.com/[username]/[repo]',
-  },
-  {
-    name: '[Project Four]',
-    summary: '[What it does and the hardest part of building it.]',
-    impact: '[The outcome, with a number if you have one.]',
-    tech: ['Rust', 'WebAssembly'],
-    liveUrl: null,
-    repoUrl: 'https://github.com/[username]/[repo]',
-  },
-];
-
-/* -------------------------------------------------------------------------- */
-/* Experience — most recent first                                              */
-/* -------------------------------------------------------------------------- */
-
-export const experience: Role[] = [
-  {
-    title: '[Job Title]',
-    company: '[Company Name]',
-    location: '[City, Country]',
-    startDate: '2024-01',
-    endDate: null,
-    dateLabel: '[Jan 2024] — Present',
-    highlights: [
-      '[Led or built X, which produced Y. Lead with the outcome, not the task.]',
-      '[Improved a number: latency, cost, conversion, error rate. Say by how much.]',
-      '[Something showing scope — mentoring, cross-team work, or a design you owned.]',
-    ],
-    tech: ['TypeScript', 'React', 'Node.js', 'AWS'],
-  },
-  {
-    title: '[Job Title]',
-    company: '[Company Name]',
-    location: '[City, Country]',
-    startDate: '2022-06',
-    endDate: '2023-12',
-    dateLabel: '[Jun 2022] — [Dec 2023]',
-    highlights: [
-      '[Shipped X to N users, resulting in Y.]',
-      '[Fixed or refactored something meaningful, and what it unlocked.]',
-    ],
-    tech: ['Python', 'Django', 'PostgreSQL'],
-  },
-  {
-    title: '[Internship Title]',
-    company: '[Company Name]',
-    location: '[City, Country]',
-    startDate: '2021-05',
-    endDate: '2021-08',
-    dateLabel: '[May 2021] — [Aug 2021]',
-    highlights: [
-      '[What you built during the internship and whether it shipped to production.]',
-    ],
-    tech: ['Java', 'Spring Boot'],
-  },
-];
-
-/* -------------------------------------------------------------------------- */
-/* Education                                                                   */
-/* -------------------------------------------------------------------------- */
-
-export const education: Education[] = [
-  {
-    degree: '[B.E. / B.Tech in Your Major]',
-    institution: '[University Name]',
-    location: '[City, Country]',
-    dateLabel: '[2021] — [2025]',
-    grade: '[GPA / percentage]',
-    activities: [
-      '[Relevant coursework: e.g. Distributed Systems, Compilers, Machine Learning]',
-      '[Society, club or position of responsibility]',
-    ],
-  },
-  {
-    degree: '[Higher Secondary / Diploma]',
-    institution: '[School Name]',
-    location: '[City, Country]',
-    dateLabel: '[2019] — [2021]',
-    grade: '[Percentage]',
-    activities: ['[Any notable achievement, olympiad or award]'],
-  },
-];
-
-/* -------------------------------------------------------------------------- */
-/* Skills                                                                      */
+/* Work — the section creators scan first                                      */
 /* -------------------------------------------------------------------------- */
 
 /**
- * Deliberately no percentage bars: "React 85%" isn't verifiable and tends to
- * read as naive to engineers. Grouped tags communicate range honestly. List
- * these roughly strongest-first within each group.
+ * Nothing here loads a video until someone clicks play. Four Instagram embeds
+ * left to load on their own weigh about 2.4MB, which is most of a creator's
+ * patience spent before they have seen a single frame.
  */
-export const skillGroups: SkillGroup[] = [
+export const reels: Reel[] = [
   {
-    name: 'Languages',
-    items: ['TypeScript', 'Python', 'Go', 'Java', 'SQL'],
+    title: '[What this one was about]',
+    client: '[CLIENT CHANNEL]',
+    clientSize: '[00k followers]',
+    format: 'Instagram Reel',
+    tags: ['[Niche]', '[Treatment]'],
+    result: '[The number — e.g. "42k views, 1.8k saves in 5 days"]',
+    url: 'https://www.instagram.com/reel/DcGbqknMind/',
+    embedCode: 'DcGbqknMind',
+    cover: null,
   },
   {
-    name: 'Frameworks & Libraries',
-    items: ['React', 'Next.js', 'Astro', 'Node.js', 'FastAPI', 'PostgreSQL'],
+    title: '[What this one was about]',
+    client: '[CLIENT CHANNEL]',
+    clientSize: '[00k followers]',
+    format: 'Instagram Reel',
+    tags: ['[Niche]', '[Treatment]'],
+    result: '[The number that proves it worked]',
+    url: 'https://www.instagram.com/reel/DcHYONgPhL-/',
+    embedCode: 'DcHYONgPhL-',
+    cover: null,
   },
   {
-    name: 'Tools & Platforms',
-    items: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Git', 'CI/CD'],
+    title: '[What this one was about]',
+    client: '[CLIENT CHANNEL]',
+    clientSize: '[00k followers]',
+    format: 'Instagram Reel',
+    tags: ['[Niche]', '[Treatment]'],
+    result: '[The number that proves it worked]',
+    url: 'https://www.instagram.com/reel/Dbb0nSaEfUx/',
+    embedCode: 'Dbb0nSaEfUx',
+    cover: null,
+  },
+  {
+    title: '[What this one was about]',
+    client: '[CLIENT CHANNEL]',
+    clientSize: '[00k followers]',
+    format: 'Instagram Reel',
+    tags: ['[Niche]', '[Treatment]'],
+    result: '[The number that proves it worked]',
+    url: 'https://www.instagram.com/reel/DbtdCeBxTWP/',
+    embedCode: 'DbtdCeBxTWP',
+    cover: null,
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Showreel — a silent, autoplaying wall of clips, vertical and landscape mixed */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Each clip is 8 seconds, silent, and rendered as an animated WebP tile in
+ * the marquee (see Showreel.astro) — always playing, no autoplay dance
+ * required. Add a clip by dropping its .webp in public/videos/, a poster
+ * frame in src/assets/showreel/, and an entry here with the right aspect
+ * ratio.
+ */
+export const showreelClips: ShowreelClip[] = [
+  { title: 'Vertical edit, clip 1', aspect: 9 / 16, src: '/videos/showreel-01.webp', poster: showreelPoster01 },
+  { title: 'Vertical edit, clip 2', aspect: 9 / 16, src: '/videos/showreel-02.webp', poster: showreelPoster02 },
+  { title: 'Landscape edit, clip 3', aspect: 16 / 9, src: '/videos/showreel-03.webp', poster: showreelPoster03 },
+  { title: 'Square edit, clip 4', aspect: 1, src: '/videos/showreel-04.webp', poster: showreelPoster04 },
+  { title: 'Vertical edit, clip 5', aspect: 9 / 16, src: '/videos/showreel-05.webp', poster: showreelPoster05 },
+  { title: 'Square edit, clip 6', aspect: 1, src: '/videos/showreel-06.webp', poster: showreelPoster06 },
+  { title: 'Landscape edit, clip 7', aspect: 16 / 9, src: '/videos/showreel-07.webp', poster: showreelPoster07 },
+  { title: 'Vertical edit, clip 8', aspect: 9 / 16, src: '/videos/showreel-08.webp', poster: showreelPoster08 },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Services                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export const services: Service[] = [
+  {
+    name: 'Video editing',
+    description:
+      'The cut itself — vlogs, educational explainers, motivational pieces and trend-led reels, delivered ready to post.',
+    includes: ['Full edit and pacing', 'Captions and text', 'Sound design and music', 'Colour pass'],
+  },
+  {
+    name: 'Content strategy',
+    description:
+      'What to make next and why. Formats, hooks and a posting rhythm your audience will actually keep up with.',
+    includes: ['Content calendar', 'Hook and format direction', 'Series planning'],
+  },
+  {
+    name: 'Channel marketing',
+    description:
+      'The rollout around the video — where it goes, when it goes, and what happens in the comments afterwards.',
+    includes: ['Campaign planning', 'Cross-platform scheduling', 'Engagement and community'],
+  },
+  {
+    name: 'Niche and audience research',
+    description:
+      'Reading the niche properly: who is watching, what is already working in it, and where the gap is for you.',
+    includes: ['Audience breakdown', 'Competitor teardown', 'Positioning notes'],
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Process — the section that answers "will you miss my upload date?"          */
+/* -------------------------------------------------------------------------- */
+
+export const processSteps: ProcessStep[] = [
+  {
+    step: '01',
+    title: 'Send the footage',
+    detail:
+      'Raw files, the reference you like, and what the video is meant to do. A Drive link is fine.',
+  },
+  {
+    step: '02',
+    title: 'First cut',
+    detail:
+      'A full edit with captions, sound and pacing — not a rough draft you have to imagine finished.',
+  },
+  {
+    step: '03',
+    title: 'Your notes',
+    detail: 'One round of changes, all in one place, so nothing gets lost across three apps.',
+  },
+  {
+    step: '04',
+    title: 'Ready to post',
+    detail: 'Final files in the right ratio, plus a caption and a posting slot that makes sense.',
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Testimonials                                                                */
+/* -------------------------------------------------------------------------- */
+
+export const testimonials: Testimonial[] = [
+  {
+    quote:
+      '[What did this creator actually say? One or two sentences in their own words beats a polished paragraph — ask them what changed after you started editing.]',
+    name: '[Their name]',
+    channel: '[@their_channel]',
+    channelSize: '[20k followers]',
+  },
+  {
+    quote:
+      '[Second quote. If you only have one real testimonial, delete this entry rather than filling it in — one true line is worth more than two invented ones.]',
+    name: '[Their name]',
+    channel: '[@their_channel]',
+    channelSize: '[10k followers]',
   },
 ];
 
@@ -271,11 +341,136 @@ export const skillGroups: SkillGroup[] = [
 /* Navigation                                                                  */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * The running order of the page. `href` doubles as the id of the section the
+ * scrub rail measures, so no position on the rail is ever written by hand.
+ */
 export const navLinks = [
+  { href: '#work', label: 'Work' },
+  { href: '#services', label: 'Services' },
+  { href: '#process', label: 'Process' },
+  { href: '#words', label: 'Words' },
   { href: '#about', label: 'About' },
-  { href: '#projects', label: 'Projects' },
-  { href: '#experience', label: 'Experience' },
-  { href: '#education', label: 'Education' },
-  { href: '#skills', label: 'Skills' },
   { href: '#contact', label: 'Contact' },
 ] as const;
+
+/* -------------------------------------------------------------------------- */
+/* Enquiry form                                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The form asks only what is needed to quote. Every extra field is a reason
+ * for someone to close the tab, so if you cannot price differently based on an
+ * answer, do not ask for it.
+ *
+ * There is no backend: submitting composes a prefilled mailto: link. To post
+ * to a real endpoint instead, set FORM_ENDPOINT to your Formspree, Basin or
+ * Netlify Forms URL and the form will submit there.
+ */
+export const FORM_ENDPOINT: string | null = null;
+
+export const enquiry = {
+  formats: [
+    'Reels / short-form',
+    'Long-form vlogs',
+    'Educational / explainer',
+    'Not sure yet',
+  ],
+  volumes: [
+    '1–4 videos a month',
+    '5–12 videos a month',
+    '12+ videos a month',
+    'One-off project',
+  ],
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* Section copy                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Headings, buttons and labels. These live here for the same reason the rest
+ * of the copy does: changing what the site says should never mean opening a
+ * component and hunting for a string between the markup and the CSS.
+ */
+export const copy = {
+  hero: {
+    primaryCta: 'See the work',
+    secondaryCta: 'Start a project',
+    stripLabel: 'Formats I cut',
+  },
+  showreel: {
+    eyebrow: 'On loop',
+    title: 'Stuff I cut',
+  },
+  work: {
+    eyebrow: 'The work',
+    title: 'Stuff I cut',
+    openLink: 'Open on Instagram',
+    ctaText: 'Want your channel cut like this?',
+    ctaButton: 'Start a project',
+  },
+  services: {
+    eyebrow: 'What I do',
+    title: 'Hire me for',
+  },
+  process: {
+    eyebrow: 'How it runs',
+    title: 'Brief to posted',
+  },
+  testimonials: {
+    eyebrow: 'Receipts',
+    title: 'Bragging rights',
+  },
+  about: {
+    eyebrow: 'The person',
+    title: "Who you're hiring",
+  },
+  contact: {
+    eyebrow: 'Say hi',
+    title: "Let's talk",
+    lead: "Send me a reel you wish had done better, or just say what you're making. I reply to everything that isn't a bulk pitch.",
+    copyButton: 'Copy',
+    copiedButton: 'Copied',
+    submit: 'Send it',
+    labels: {
+      name: 'Name',
+      email: 'Email',
+      channel: 'Channel link',
+      channelPlaceholder: 'https://instagram.com/…',
+      format: 'What you make',
+      volume: 'How much',
+      message: 'What do you need?',
+    },
+    errors: {
+      name: 'Please enter your name.',
+      email: 'Please enter your email address.',
+      emailInvalid: 'Please enter a valid email address.',
+      channelInvalid: 'Please enter a full link, starting with https://',
+      message: 'Please say what you need.',
+    },
+    notes: {
+      mailto:
+        'This opens your email app with the message ready to send — nothing is stored on a server.',
+      endpoint: 'Your message goes straight to my inbox.',
+      sending: 'Opening your email app…',
+      copyFailed: 'Copying failed — please copy manually',
+    },
+  },
+  footer: {
+    availability: 'Taking on new creators.',
+    cta: 'Say hi',
+    builtWith: 'Built with Astro.',
+    backToTop: 'Back to top',
+  },
+  skipLink: 'Skip to content',
+  /**
+   * The scrub rail down the right-hand side. `intro` names the hero, which the
+   * header nav leaves out because the wordmark already covers "back to top" —
+   * but the rail draws the whole reel, so it needs a first stop.
+   */
+  rail: {
+    label: 'Timeline',
+    intro: 'Intro',
+  },
+} as const;

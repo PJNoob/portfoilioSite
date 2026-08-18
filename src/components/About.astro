@@ -1,39 +1,67 @@
 ---
-import { profile } from '../data/profile';
+/**
+ * Written as "why is this person safe to hand a channel to", not as a
+ * biography. The numbers sit beside the prose because they are the part a
+ * creator checks first.
+ */
+import { Image } from 'astro:assets';
+import { profile, copy } from '../data/profile';
 import SectionHeading from './SectionHeading.astro';
+import portrait from '../assets/profile/portrait.jpg';
 ---
 
 <section class="section" id="about" aria-labelledby="about-heading">
   <div class="container">
-    <SectionHeading id="about-heading" eyebrow="About" title="A little background" />
+    <SectionHeading
+      id="about-heading"
+      eyebrow={copy.about.eyebrow}
+      title={copy.about.title}
+    />
 
     <div class="about">
       <div class="about__body reveal">
         {profile.about.map((paragraph) => <p>{paragraph}</p>)}
       </div>
 
-      <aside class="about__aside reveal" style="--reveal-delay: 120ms">
-        {/* Inline SVG monogram — no external image to load or hotlink.
-            Replace with an <img> of a real photo if you prefer. */}
-        <div class="monogram" role="img" aria-label={`${profile.name} monogram`}>
-          <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-            <rect width="120" height="120" rx="12" class="monogram__bg"></rect>
-            <text x="60" y="62" class="monogram__text">{profile.initials}</text>
-          </svg>
-        </div>
-
-        <dl class="stats">
-          {
-            profile.highlights.map((item) => (
-              <div class="stats__item">
-                <dt class="stats__label">{item.label}</dt>
-                <dd class="stats__value">{item.value}</dd>
-              </div>
-            ))
-          }
-        </dl>
-      </aside>
+      <div class="about__side reveal" style="--reveal-delay: 120ms">
+        {/* The print tilts like a photo tossed onto a desk, and straightens
+            flat on hover. It doesn't need to match the text column's height: a photo
+            sitting shorter or taller than adjacent copy reads as normal,
+            which a stack of two card-shapes trying to add up to the same
+            height did not. */}
+        <figure class="print">
+          <div class="print__photo">
+            <Image
+              src={portrait}
+              alt={`${profile.name}, ${profile.title}`}
+              widths={[260, 390, 520]}
+              sizes="(min-width: 900px) 260px, 50vw"
+              loading="lazy"
+            />
+          </div>
+          <figcaption class="print__caption">
+            <span class="print__name">{profile.name}</span>
+            <span class="print__role">{profile.title}</span>
+          </figcaption>
+        </figure>
+      </div>
     </div>
+
+    {/* Full-width now rather than stacked in the side column — its own
+        content (three rows of numbers) was already taller than the bio
+        text on its own, so no side-column height could ever have matched
+        without either column faking its own content. A horizontal strip
+        sidesteps the comparison entirely. */}
+    <dl class="stats reveal" style="--reveal-delay: 160ms">
+      {
+        profile.highlights.map((item) => (
+          <div class="stats__item">
+            <dt class="stats__label">{item.label}</dt>
+            <dd class="stats__value">{item.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
   </div>
 </section>
 
@@ -65,51 +93,99 @@ import SectionHeading from './SectionHeading.astro';
     color: var(--fg-muted);
   }
 
-  .about__aside {
+  /* --- Portrait print --- */
+  .print {
+    width: min(260px, 70%);
+    padding: var(--space-2) var(--space-2) var(--space-3);
+    background-color: var(--surface);
+    border: var(--border-width) solid var(--border);
+    box-shadow: var(--shadow);
+    transform: rotate(-3deg);
+    transition: transform var(--duration) var(--ease-expo-out),
+      box-shadow var(--duration) var(--ease-expo-out);
+  }
+
+  .print:hover {
+    transform: rotate(0deg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .print__photo {
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background-color: var(--bg-elevated);
+  }
+
+  .print__photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .print__caption {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    align-items: center;
+    text-align: center;
+    padding-top: var(--space-2);
   }
 
-  .monogram {
-    width: clamp(6rem, 18vw, 8.5rem);
+  .print__name {
+    font-family: var(--font-display), Impact, sans-serif;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
   }
 
-  .monogram__bg {
-    fill: var(--accent-wash);
-    stroke: var(--border);
+  .print__role {
+    font-size: 0.6875rem;
+    color: var(--fg-subtle);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    margin-top: 2px;
   }
 
-  .monogram__text {
-    font-family: var(--font-display), Georgia, serif;
-    font-size: 44px;
-    text-anchor: middle;
-    dominant-baseline: middle;
-    fill: var(--accent);
-  }
-
+  /* Full-width 3-up strip, not the stacked-rows shape it used to sit in —
+     it sits below the two-column split entirely now. */
   .stats {
+    margin-top: var(--space-7);
     display: grid;
-    gap: var(--space-4);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    border: var(--border-width) solid var(--border);
+    background-color: var(--surface);
+    box-shadow: var(--shadow);
   }
 
   .stats__item {
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border);
+    padding: var(--space-5);
   }
 
+  .stats__item + .stats__item {
+    border-left: var(--border-width) solid var(--border);
+  }
+
+  /* The number leads and the label explains it, so the number is set first in
+     the visual order even though the label comes first in the markup — a <dl>
+     needs its <dt> before its <dd> to stay valid. */
   .stats__value {
-    font-family: var(--font-display), Georgia, serif;
-    font-size: 1.75rem;
-    line-height: 1.1;
-    letter-spacing: var(--tracking-tight);
+    font-family: var(--font-display), Impact, sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1;
+    letter-spacing: var(--tracking-display);
+    color: var(--accent-ink);
   }
 
   .stats__label {
+    order: 2;
     font-size: var(--text-xs);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
     color: var(--fg-subtle);
-    margin-bottom: var(--space-2);
+    margin-top: var(--space-2);
+  }
+
+  .stats__item {
+    display: flex;
+    flex-direction: column;
   }
 </style>

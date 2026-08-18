@@ -1,48 +1,60 @@
 ---
 /**
- * The signature moment. Oversized display type against small body text — the
- * scale contrast is roughly 10:1 at desktop widths, and that tension is what
- * makes someone stop scrolling.
+ * The signature moment. Oversized Archivo Black against small body text — the
+ * scale contrast is what makes someone stop scrolling, and it is the same
+ * poster voice Bhumi already uses elsewhere.
  *
  * Entry motion is choreographed rather than simultaneous: the words rise in
- * sequence, then the supporting content follows.
+ * sequence out of a mask, then the supporting content follows.
+ *
+ * A stark ink divider splits the headline from a full-bleed portrait — the
+ * same seam every page-ground transition already uses elsewhere on the site,
+ * so the split reads as structural rather than decorative. The format strip
+ * that used to fill this column moved down to the About section once the
+ * photo took its place.
  */
-import { profile } from '../data/profile';
+import { Image } from 'astro:assets';
+import { profile, copy } from '../data/profile';
+import portrait from '../assets/profile/portrait.jpg';
 ---
 
 <section class="hero" id="top">
   <div class="container hero__inner">
-    <p class="hero__label">{profile.title}</p>
+    <div class="hero__text">
+      <p class="hero__label">{profile.title}</p>
 
-    <h1 class="hero__title">
-      {
-        profile.headline.map((word, i) => (
-          <span class="hero__line">
-            {/* The inner span is what actually moves; the outer line clips it,
-                so each word rises out of a mask rather than just fading. */}
-            <span class="hero__word" style={`--delay: ${180 + i * 80}ms`}>
-              {word}
+      <h1 class="hero__title">
+        {
+          profile.headline.map((word, i) => (
+            <span class="hero__line">
+              {/* The inner span is what actually moves; the outer line clips it,
+                  so each word rises out of a mask rather than just fading. */}
+              <span class="hero__word" style={`--delay: ${180 + i * 80}ms`}>
+                {word}
+              </span>
             </span>
-          </span>
-        ))
-      }
-    </h1>
+          ))
+        }
+      </h1>
 
-    <p class="hero__tagline">{profile.tagline}</p>
+      <p class="hero__tagline">{profile.tagline}</p>
 
-    <div class="hero__actions">
-      <a class="button" href="#projects">View my work</a>
-      <a class="button button--ghost" href="#contact">Get in touch</a>
+      <div class="hero__actions">
+        <a class="button" href="#work">{copy.hero.primaryCta}</a>
+        <a class="button button--ghost" href="#contact">{copy.hero.secondaryCta}</a>
+      </div>
     </div>
 
-    <p class="hero__meta">
-      <span>{profile.location}</span>
-      <span aria-hidden="true">·</span>
-      <a href={`mailto:${profile.email}`}>{profile.email}</a>
-    </p>
+    <div class="hero__photo">
+      <Image
+        src={portrait}
+        alt={`${profile.name}, ${profile.title}`}
+        widths={[480, 720, 960, 1200]}
+        sizes="(min-width: 960px) 42vw, 100vw"
+        loading="eager"
+      />
+    </div>
   </div>
-
-  <span class="hero__scroll" aria-hidden="true">Scroll</span>
 </section>
 
 <style>
@@ -52,19 +64,38 @@ import { profile } from '../data/profile';
     align-items: center;
     /* Fills the viewport minus the header, without the 100vh mobile bug. */
     min-height: calc(100svh - var(--header-height));
-    padding-block: var(--space-8) var(--space-9);
+    padding-block: var(--space-7) var(--space-8);
   }
 
   .hero__inner {
+    display: grid;
+    gap: var(--space-8);
     width: 100%;
+  }
+
+  /* Text keeps the bulk of the weight, but the photo now fills its column
+     rather than sitting centered inside it — stretch, not center, so the
+     image runs the full height of the row. */
+  @media (min-width: 960px) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      align-items: stretch;
+      gap: var(--space-7);
+    }
+
+    .hero__text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
   }
 
   .hero__label {
     font-size: var(--text-xs);
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
-    color: var(--fg-subtle);
+    color: var(--accent-ink);
     margin-bottom: var(--space-5);
     animation: fade-up var(--duration-slow) var(--ease-expo-out) both;
   }
@@ -73,7 +104,7 @@ import { profile } from '../data/profile';
     font-size: var(--text-hero);
     /* Slight optical pull to the left so the large type aligns visually
        rather than mathematically. */
-    margin-left: -0.04em;
+    margin-left: -0.03em;
     margin-bottom: var(--space-5);
   }
 
@@ -81,7 +112,7 @@ import { profile } from '../data/profile';
     display: block;
     /* Masks the word so it rises into view. */
     overflow: hidden;
-    padding-bottom: 0.08em;
+    padding-bottom: 0.06em;
   }
 
   .hero__word {
@@ -91,7 +122,7 @@ import { profile } from '../data/profile';
   }
 
   .hero__tagline {
-    max-width: 46ch;
+    max-width: 44ch;
     font-size: var(--text-lead);
     color: var(--fg-muted);
     margin-bottom: var(--space-6);
@@ -101,46 +132,36 @@ import { profile } from '../data/profile';
   .hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-bottom: var(--space-7);
+    gap: var(--space-4);
     animation: fade-up var(--duration-slow) var(--ease-expo-out) 560ms both;
   }
 
-  .hero__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    font-size: var(--text-sm);
-    color: var(--fg-subtle);
-    animation: fade-up var(--duration-slow) var(--ease-expo-out) 680ms both;
+  /* --- Portrait pane --- */
+  .hero__photo {
+    overflow: hidden;
+    background-color: var(--bg-elevated);
+    animation: fade-up var(--duration-slow) var(--ease-expo-out) 300ms both;
   }
 
-  .hero__meta a {
-    border-bottom: 1px solid var(--border-strong);
-    transition: color var(--duration-fast) var(--ease-quart-out),
-      border-color var(--duration-fast) var(--ease-quart-out);
+  .hero__photo :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  .hero__meta a:hover {
-    color: var(--accent);
-    border-color: var(--accent);
+  /* The ink divider only reads as a seam once the columns sit side by side —
+     below that it becomes a top border between two stacked blocks instead. */
+  @media (min-width: 960px) {
+    .hero__photo {
+      border-left: var(--border-width) solid var(--border);
+    }
   }
 
-  .hero__scroll {
-    position: absolute;
-    right: clamp(1.25rem, 5vw, 3rem);
-    bottom: var(--space-6);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--fg-subtle);
-    writing-mode: vertical-rl;
-    animation: fade-up var(--duration-slow) var(--ease-expo-out) 800ms both;
-  }
-
-  @media (max-width: 640px) {
-    .hero__scroll {
-      display: none;
+  @media (max-width: 959px) {
+    .hero__photo {
+      aspect-ratio: 4 / 5;
+      border-top: var(--border-width) solid var(--border);
     }
   }
 
@@ -171,8 +192,7 @@ import { profile } from '../data/profile';
     .hero__word,
     .hero__tagline,
     .hero__actions,
-    .hero__meta,
-    .hero__scroll {
+    .hero__photo {
       animation: none;
       opacity: 1;
       transform: none;

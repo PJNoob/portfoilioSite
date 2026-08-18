@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <!-- CUSTOMIZE: swap the text below for your own initials. -->
-  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
-  <text x="32" y="34" fill="#ff7a45" font-family="Georgia, serif" font-size="30"
-        text-anchor="middle" dominant-baseline="middle">P</text>
+  <rect width="64" height="64" fill="#1f2416"/>
+  <text x="32" y="34" fill="#cc3a63" font-family="Impact, sans-serif" font-size="34"
+        text-anchor="middle" dominant-baseline="middle">B</text>
 </svg>

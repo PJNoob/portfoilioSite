@@ -1,0 +1,92 @@
+---
+/**
+ * Kept short and attributed. An unattributed quote is worth nothing to a
+ * creator deciding whether to hand over their channel.
+ */
+import { testimonials, copy } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+---
+
+<section class="section section--alt" id="words" aria-labelledby="words-heading">
+  <div class="container">
+    <SectionHeading
+      id="words-heading"
+      eyebrow={copy.testimonials.eyebrow}
+      title={copy.testimonials.title}
+    />
+
+    <ul class="grid">
+      {
+        testimonials.map((item, i) => (
+          <li
+            class="quote reveal"
+            style={`--reveal-delay: ${i * 110}ms; --tilt: ${i % 2 === 0 ? -1 : 1}deg`}
+          >
+            <blockquote class="quote__text">{item.quote}</blockquote>
+            <figcaption class="quote__by">
+              <span class="quote__name">{item.name}</span>
+              <span class="quote__channel">
+                {item.channel} · {item.channelSize}
+              </span>
+            </figcaption>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 800px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .quote {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    background-color: var(--surface);
+    border: var(--border-width) solid var(--border);
+    box-shadow: var(--shadow);
+    transform: rotate(var(--tilt));
+    transition: transform var(--duration) var(--ease-expo-out);
+  }
+
+  .quote:hover {
+    transform: rotate(0deg);
+  }
+
+  .quote__text {
+    font-family: var(--font-display), Impact, sans-serif;
+    font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .quote__by {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-top: auto;
+    padding-top: var(--space-4);
+    border-top: var(--border-width) dashed var(--border);
+  }
+
+  .quote__name {
+    font-weight: 700;
+    font-size: var(--text-sm);
+  }
+
+  .quote__channel {
+    font-size: var(--text-sm);
+    color: var(--fg-subtle);
+  }
+</style>

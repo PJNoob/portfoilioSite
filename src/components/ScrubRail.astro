@@ -1,0 +1,815 @@
+---
+/**
+ * The scrub rail: the page read back as a waveform, down the full right side.
+ *
+ * This is the one piece of chrome that is about the craft rather than the copy,
+ * so it is built as an instrument and not as a progress bar:
+ *
+ *   - The waveform is drawn from the page's own content (see data/waveform.ts)
+ *     and each section's group of bars is stretched to that section's MEASURED
+ *     scroll band, so the drawing is a map of the page, not an analogy of it.
+ *   - You can grab it. Press and drag scrubs the page, it snaps to section
+ *     starts, and Shift defeats the snap the way it does in an NLE.
+ *   - The blade carries the name of the section it is parked on, and a drawn
+ *     play/pause state that flips to rewind on the way back up.
+ *   - The gate — a window riding the blade where bars are drawn wider, in
+ *     accent, bleeding past the rail's outline — is the signature. It widens
+ *     with scroll velocity, so a fast scroll makes a bigger disturbance.
+ *
+ * Marks are real links with accessible names, keyboard focus and aria-current.
+ * The rail is hidden below the width where there is room beside the 72rem
+ * container; the header nav covers every section at every size.
+ */
+import { navLinks, copy } from '../data/profile';
+import { waveformSections, BAR_PITCH, BAR_HEIGHT, WAVE_WIDTH } from '../data/waveform';
+
+const stops = [{ href: '#top', label: copy.rail.intro }, ...navLinks];
+
+/**
+ * Pre-measurement geometry. Positions are even and spans equal until the
+ * script measures the real thing on load — they exist so the first paint, and a
+ * page with JavaScript turned off, shows a plausible reel rather than a
+ * collapsed one.
+ */
+const waves = stops.map((stop, i) => {
+  const amps = waveformSections.find((section) => section.href === stop.href)?.amps ?? [];
+  return {
+    ...stop,
+    id: `wave-${stop.href.slice(1)}`,
+    at: i / stops.length,
+    span: 1 / stops.length,
+    /* Each group draws in its own bar-count-tall viewBox and is then stretched
+       to the section's band, which is what varies the pitch per section. */
+    height: Math.max(BAR_PITCH, amps.length * BAR_PITCH),
+    bars: amps.map((amp, j) => ({
+      y: j * BAR_PITCH,
+      x: (WAVE_WIDTH - amp * WAVE_WIDTH) / 2,
+      width: amp * WAVE_WIDTH,
+    })),
+  };
+});
+---
+
+<nav class="scrub" aria-label={copy.rail.label} data-scrub>
+  <div class="scrub__rail" data-scrub-rail>
+    <div class="scrub__track" aria-hidden="true">
+      {/* Leader: the visible reason the blade stops short of the edges. */}
+      <span class="scrub__leader scrub__leader--head"></span>
+      <span class="scrub__leader scrub__leader--tail"></span>
+
+      {/* The stock. Every bar in the document lives here exactly once; the
+          played and gate layers clone these groups with <use>. */}
+      <div class="scrub__band scrub__waves">
+        {
+          waves.map((wave) => (
+            <svg
+              class="scrub__wave"
+              style={`--at: ${wave.at}; --span: ${wave.span}`}
+              data-wave-for={wave.href}
+              viewBox={`0 0 ${WAVE_WIDTH} ${wave.height}`}
+              preserveAspectRatio="none"
+              focusable="false"
+            >
+              <g id={wave.id}>
+                {wave.bars.map((bar) => (
+                  <rect x={bar.x} y={bar.y} width={bar.width} height={BAR_HEIGHT} />
+                ))}
+              </g>
+            </svg>
+          ))
+        }
+      </div>
+
+      {/* The played portion: the same bars, clipped to the progress. Clipped
+          rather than resized — a height that changes every frame relays out the
+          SVG inside it, where a clip only repaints. */}
+      <div class="scrub__played">
+        <div class="scrub__band scrub__waves scrub__waves--played">
+          {
+            waves.map((wave) => (
+              <svg
+                class="scrub__wave"
+                style={`--at: ${wave.at}; --span: ${wave.span}`}
+                data-wave-for={wave.href}
+                viewBox={`0 0 ${WAVE_WIDTH} ${wave.height}`}
+                preserveAspectRatio="none"
+                focusable="false"
+              >
+                <use href={`#${wave.id}`} />
+              </svg>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    {/* The gate. Outside the track, and wider than it, so the bars it draws
+        bulge past the rail's outline. Masked to a window that rides the blade. */}
+    <div class="scrub__gate" aria-hidden="true">
+      <div class="scrub__band scrub__waves scrub__waves--gate">
+        {
+          waves.map((wave) => (
+            <svg
+              class="scrub__wave"
+              style={`--at: ${wave.at}; --span: ${wave.span}`}
+              data-wave-for={wave.href}
+              viewBox={`0 0 ${WAVE_WIDTH} ${wave.height}`}
+              preserveAspectRatio="none"
+              focusable="false"
+            >
+              <use href={`#${wave.id}`} />
+            </svg>
+          ))
+        }
+      </div>
+    </div>
+
+    <ul class="scrub__marks scrub__band" data-scrub-band>
+      {
+        waves.map((wave) => (
+          <li
+            class="scrub__mark"
+            style={`--at: ${wave.at}`}
+            data-scrub-mark={wave.href}
+            data-scrub-name={wave.label}
+          >
+            {/* draggable=false or the browser starts dragging the link itself,
+                which cancels the pointer stream mid-scrub. */}
+            <a class="scrub__link" href={wave.href} draggable="false" data-scrub-link>
+              <span class="scrub__label">{wave.label}</span>
+              <span class="scrub__notch" aria-hidden="true"></span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    {/* Where a press would land, and what it would land on. */}
+    <div class="scrub__ghost" aria-hidden="true">
+      <span class="scrub__ghostName" data-scrub-ghost></span>
+      <span class="scrub__ghostBlade"></span>
+    </div>
+
+    {/* Rides the progress: the blade, and the section it is parked on. */}
+    <div class="scrub__caret" aria-hidden="true">
+      <p class="scrub__readout">
+        <span class="scrub__state"></span>
+        {/* Written server-side too, so a page without JavaScript shows the
+            first stop rather than an empty box. */}
+        <span class="scrub__now" data-scrub-now>{waves[0].label}</span>
+      </p>
+      <span class="scrub__blade"></span>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // -------------------------------------------------------------------------
+  // The rail's own script. Every number here comes from measured geometry:
+  // measuring is expensive, so it happens once per layout change and never
+  // inside the scroll handler — the handler only asks for a frame, and the
+  // frame only writes.
+  // -------------------------------------------------------------------------
+  const scrub = document.querySelector<HTMLElement>('[data-scrub]');
+  const rail = scrub?.querySelector<HTMLElement>('[data-scrub-rail]');
+  const band = scrub?.querySelector<HTMLElement>('[data-scrub-band]');
+
+  if (scrub && rail && band) {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+    const marks = Array.from(scrub.querySelectorAll<HTMLElement>('[data-scrub-mark]'));
+    const names = marks.map((mark) => mark.dataset.scrubName ?? '');
+    const nowEl = scrub.querySelector<HTMLElement>('[data-scrub-now]');
+    const ghostEl = scrub.querySelector<HTMLElement>('[data-scrub-ghost]');
+
+    // All three layers draw the same section, so they are written together.
+    const layers = new Map<string, HTMLElement[]>();
+    for (const svg of scrub.querySelectorAll<HTMLElement>('[data-wave-for]')) {
+      const href = svg.dataset.waveFor;
+      if (!href) continue;
+      const group = layers.get(href);
+      if (group) group.push(svg);
+      else layers.set(href, [svg]);
+    }
+
+    // --- Cached geometry ---
+    let scrollable = 1;
+    let bandTop = 0;
+    let bandHeight = 1;
+    const at: number[] = [];
+
+    const measure = () => {
+      scrollable = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      // The same padding an anchor jump lands against, so a mark and the blade
+      // agree about where its section starts.
+      const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+
+      const rect = band.getBoundingClientRect();
+      bandTop = rect.top;
+      bandHeight = Math.max(1, rect.height);
+      scrub.style.setProperty('--band-h', `${bandHeight}px`);
+
+      marks.forEach((mark, i) => {
+        const href = mark.dataset.scrubMark;
+        const section = href ? document.querySelector<HTMLElement>(href) : null;
+        if (!section) return;
+
+        const start = clamp01((section.offsetTop - pad) / scrollable);
+        // The footer is not a stop, so the last section's stock runs to the end
+        // of the reel rather than stopping short of the rail's bottom.
+        const end =
+          i === marks.length - 1
+            ? 1
+            : clamp01((section.offsetTop + section.offsetHeight - pad) / scrollable);
+
+        at[i] = start;
+        mark.style.setProperty('--at', String(start));
+
+        const span = Math.max(0.02, end - start);
+        for (const svg of layers.get(href!) ?? []) {
+          svg.style.setProperty('--at', String(start));
+          svg.style.setProperty('--span', String(span));
+        }
+      });
+    };
+
+    // --- Progress, velocity, and the section the blade is on ---
+    let queued = false;
+    let lastProgress = 0;
+    let velocity = 0;
+    let current = -1;
+
+    const stopAt = (t: number) => {
+      let index = 0;
+      for (let i = 0; i < at.length; i += 1) if (t >= (at[i] ?? 0) - 0.0015) index = i;
+      return index;
+    };
+
+    const render = () => {
+      queued = false;
+      const progress = clamp01(window.scrollY / scrollable);
+      scrub.style.setProperty('--progress', String(progress));
+
+      if (!prefersReducedMotion) {
+        const delta = progress - lastProgress;
+        // A decayed peak: a burst of scrolling stays hot for a few frames
+        // instead of flickering off between wheel ticks.
+        velocity = Math.max(Math.min(Math.abs(delta) * 26, 1), velocity * 0.88);
+        scrub.style.setProperty('--vel', velocity.toFixed(3));
+        if (Math.abs(delta) > 0.0004) scrub.classList.toggle('is-reverse', delta < 0);
+      }
+      lastProgress = progress;
+
+      const index = stopAt(progress);
+      if (index !== current) {
+        current = index;
+        marks.forEach((mark, i) => {
+          const isCurrent = i === index;
+          mark.classList.toggle('is-current', isCurrent);
+          mark.classList.toggle('is-passed', i <= index);
+          const link = mark.querySelector('[data-scrub-link]');
+          if (!link) return;
+          if (isCurrent) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        });
+        if (nowEl) nowEl.textContent = names[index] ?? '';
+      }
+
+      // Keep rendering while the velocity is still bleeding off.
+      if (velocity > 0.01) request();
+    };
+
+    const request = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(render);
+    };
+
+    // Play while the reel is moving, pause when it settles.
+    let idleTimer = 0;
+    window.addEventListener(
+      'scroll',
+      () => {
+        request();
+        scrub.classList.add('is-scrubbing');
+        window.clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(() => scrub.classList.remove('is-scrubbing'), 140);
+      },
+      { passive: true }
+    );
+
+    let resizeTimer = 0;
+    const remeasure = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        measure();
+        request();
+      }, 120);
+    };
+    window.addEventListener('resize', remeasure, { passive: true });
+    window.addEventListener('orientationchange', remeasure, { passive: true });
+
+    measure();
+    request();
+
+    // The display face changes how tall every section is, so anything measured
+    // before it lands is measured against the fallback font.
+    if ('fonts' in document) {
+      document.fonts.ready.then(() => {
+        measure();
+        request();
+      });
+    }
+
+    // --- Grab it -----------------------------------------------------------
+    // Press the rail and the page follows the pointer. A press that starts on
+    // a mark stays a link until the pointer actually moves, so clicking a
+    // section still navigates; a press on bare track scrubs immediately, the
+    // way clicking a timeline ruler does.
+    const positionOf = (clientY: number) => clamp01((clientY - bandTop) / bandHeight);
+
+    // Nine pixels of magnetism. In pixels rather than a fraction of the band,
+    // or the strength of the snap would quietly follow the rail's height.
+    const snapped = (t: number) => {
+      for (const a of at) if (Math.abs(a - t) * bandHeight < 9) return a;
+      return t;
+    };
+
+    // 'instant' rather than 'auto': 'auto' defers to the smooth scroll-behaviour
+    // in the stylesheet, which would leave the page lagging behind the pointer.
+    const scrubTo = (t: number) => window.scrollTo({ top: t * scrollable, behavior: 'instant' });
+
+    let pointer = -1;
+    let armed = false;
+    let dragging = false;
+    let startY = 0;
+    let suppressClick = false;
+    let hover = 0;
+    let hoverQueued = false;
+
+    const applyHover = () => {
+      hoverQueued = false;
+      scrub.style.setProperty('--hover', String(hover));
+      if (ghostEl) ghostEl.textContent = names[stopAt(hover)] ?? '';
+      if (prefersReducedMotion) return;
+      // Marks lean towards the pointer.
+      marks.forEach((mark, i) => {
+        const distance = Math.abs((at[i] ?? 0) - hover) * bandHeight;
+        mark.style.setProperty('--mag', Math.max(0, 1 - distance / 90).toFixed(3));
+      });
+    };
+
+    // Capture starts with the drag, not with the press: a captured pointer
+    // retargets its own click to the capturing element, which would stop a
+    // plain click on a mark from ever activating the link.
+    const beginDrag = (event: PointerEvent) => {
+      armed = false;
+      dragging = true;
+      scrub.classList.add('is-dragging');
+      rail.setPointerCapture(event.pointerId);
+    };
+
+    const release = () => {
+      if (dragging) {
+        dragging = false;
+        // The pointerup that ends a drag must not also follow a link.
+        suppressClick = true;
+        scrub.classList.remove('is-dragging');
+      }
+      armed = false;
+      if (pointer >= 0 && rail.hasPointerCapture(pointer)) rail.releasePointerCapture(pointer);
+      pointer = -1;
+    };
+
+    rail.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      // A new gesture: whatever the last one asked to swallow is stale now, or a
+      // drag would eat the next mark click that happens to follow it.
+      suppressClick = false;
+      pointer = event.pointerId;
+      startY = event.clientY;
+
+      if ((event.target as HTMLElement).closest('[data-scrub-link]')) {
+        armed = true;
+        return;
+      }
+
+      beginDrag(event);
+      scrubTo(event.shiftKey ? positionOf(event.clientY) : snapped(positionOf(event.clientY)));
+      // No text selection dragged out of the labels.
+      event.preventDefault();
+    });
+
+    rail.addEventListener('pointermove', (event) => {
+      hover = positionOf(event.clientY);
+      if (!hoverQueued) {
+        hoverQueued = true;
+        requestAnimationFrame(applyHover);
+      }
+      // Four pixels of slop: enough that a click on a mark is never a scrub.
+      // The button check matters: a press released off the rail never reaches
+      // pointerup here, and without it the next button-less pass over the rail
+      // would start scrubbing on its own.
+      if (armed && (event.buttons & 1) === 0) armed = false;
+      if (armed && Math.abs(event.clientY - startY) > 4) beginDrag(event);
+      if (dragging) scrubTo(event.shiftKey ? hover : snapped(hover));
+    });
+
+    rail.addEventListener('pointerup', release);
+    rail.addEventListener('pointercancel', release);
+
+    rail.addEventListener(
+      'click',
+      (event) => {
+        if (!suppressClick) return;
+        suppressClick = false;
+        event.preventDefault();
+        event.stopPropagation();
+      },
+      true
+    );
+
+    rail.addEventListener('pointerenter', () => scrub.classList.add('is-hovering'));
+    rail.addEventListener('pointerleave', () => {
+      if (dragging) return;
+      armed = false;
+      scrub.classList.remove('is-hovering');
+    });
+  }
+</script>
+
+<style>
+  /* ---------------------------------------------------------------------------
+     A fixed instrument owning the full right-hand gutter: a waveform track
+     drawn from the page's content, marks at measured positions, and a blade
+     that rides the scroll.
+     --------------------------------------------------------------------------- */
+  .scrub {
+    --rail-h: 58vh;
+    --rail-w: 28px;
+    --rail-inset: 12px;
+    /* Leader at each end. The blade travels the band between them, so it never
+       sits against the rail's own outline. */
+    --band-pad: var(--space-5);
+    --band-h: calc(var(--rail-h) - var(--band-pad) * 2);
+    --vel: 0;
+    --hover: 0;
+    position: fixed;
+    top: 50%;
+    right: 0;
+    /* Under the header, which it no longer crosses. */
+    z-index: 90;
+    display: none;
+    /* A 44px strip to grab, of which the track is the visible part. */
+    width: 44px;
+    height: var(--rail-h);
+    margin-top: calc(var(--rail-h) / -2);
+    /* The rail must never stand between the reader and the page: only the strip
+       itself takes the pointer. */
+    pointer-events: none;
+  }
+
+  /* Only where there is room beside the 72rem container. Below that it would
+     sit on top of the content it is describing. */
+  @media (min-width: 1280px) {
+    .scrub {
+      display: block;
+    }
+  }
+
+  .scrub__rail {
+    position: absolute;
+    inset: 0;
+    pointer-events: auto;
+    /* Vertical touch drags scrub the rail rather than scrolling past it. */
+    touch-action: none;
+    cursor: ns-resize;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .scrub.is-dragging .scrub__rail {
+    cursor: grabbing;
+  }
+
+  .scrub__track {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: var(--rail-inset);
+    width: var(--rail-w);
+    border: var(--border-width) solid var(--border);
+    /* A fixed instrument panel, not the page ground: sections now vary
+       (cream/yellow/navy), so the track must stay consistent rather than
+       trying to match whichever one is currently behind it. */
+    background-color: var(--surface);
+    overflow: hidden;
+  }
+
+  /* --- Leader --- */
+  .scrub__leader {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--band-pad);
+    background-image: repeating-linear-gradient(
+      135deg,
+      var(--fg-subtle) 0 1px,
+      transparent 1px 6px
+    );
+    opacity: 0.3;
+  }
+
+  .scrub__leader--head {
+    top: 0;
+  }
+
+  .scrub__leader--tail {
+    bottom: 0;
+  }
+
+  /* --- The stock --- */
+  /* Everything that has to line up with the scroll lives in the band, so a
+     mark, a bar and the blade cannot disagree about where a section starts. */
+  .scrub__band {
+    position: absolute;
+    top: var(--band-pad);
+    bottom: var(--band-pad);
+    left: 0;
+    right: 0;
+  }
+
+  /* Fills whatever box it is drawn in — the track for the stock and the played
+     layer, the wider gate box for the gate — so the inset is never applied
+     twice. */
+  .scrub__wave {
+    position: absolute;
+    top: calc(var(--at, 0) * 100%);
+    left: 0;
+    right: 0;
+    height: calc(var(--span, 0.14) * 100%);
+    fill: var(--border);
+    opacity: 0.4;
+  }
+
+  .scrub__played {
+    position: absolute;
+    inset: 0;
+    /* Down to the blade exactly: the band's own offset plus the progress
+       through it, measured against the full-height track. */
+    clip-path: inset(0 0 calc(100% - var(--band-pad) - var(--progress, 0) * var(--band-h)) 0);
+    will-change: clip-path;
+  }
+
+  .scrub__waves--played .scrub__wave {
+    fill: var(--accent);
+    opacity: 1;
+    /* Louder the faster the reel runs. */
+    transform: scaleX(calc(1 + var(--vel) * 0.28));
+  }
+
+  /* --- The gate: the signature ---
+     A window riding the blade where the bars are drawn wider and in accent.
+     It sits outside the track and is wider than it, so bars bulge past the
+     rail's ink outline; the window itself grows with scroll velocity. */
+  .scrub__gate {
+    --gate-h: calc(44px + var(--vel) * 62px);
+    --gate-bleed: 7px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: calc(var(--rail-inset) - var(--gate-bleed));
+    width: calc(var(--rail-w) + var(--gate-bleed) * 2);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 26% 74%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 26% 74%, transparent 100%);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% var(--gate-h);
+    mask-size: 100% var(--gate-h);
+    -webkit-mask-position: 0
+      calc(var(--band-pad) + var(--progress, 0) * var(--band-h) - var(--gate-h) / 2);
+    mask-position: 0 calc(var(--band-pad) + var(--progress, 0) * var(--band-h) - var(--gate-h) / 2);
+  }
+
+  /* The gate's box is wider than the track and the bars are mirrored about the
+     centre line, so they widen simply by being drawn in it. */
+  .scrub__gate .scrub__wave {
+    fill: var(--accent);
+    opacity: 1;
+  }
+
+  /* --- The blade and its readout --- */
+  .scrub__caret {
+    position: absolute;
+    top: var(--band-pad);
+    left: 0;
+    right: 0;
+    transform: translateY(calc(var(--progress, 0) * var(--band-h)));
+    will-change: transform;
+  }
+
+  .scrub__blade {
+    position: absolute;
+    top: -5px;
+    right: calc(var(--rail-inset) - 5px);
+    width: calc(var(--rail-w) + 10px);
+    height: 10px;
+    border: var(--border-width) solid var(--border);
+    background-color: var(--accent);
+    /* Squashes into the direction of travel. */
+    transform: scaleY(calc(1 + var(--vel) * 0.7));
+  }
+
+  .scrub__readout {
+    position: absolute;
+    top: 0;
+    right: calc(var(--rail-inset) + var(--rail-w) + var(--space-4));
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: var(--border-width) solid var(--border);
+    background-color: var(--surface);
+    box-shadow: var(--shadow);
+    transform: translateY(-50%);
+    white-space: nowrap;
+  }
+
+  /* Play while the reel is moving, pause when it settles, rewind on the way
+     back up. Drawn, not typed: a glyph would fall back to an emoji font on
+     some platforms. */
+  .scrub__state {
+    flex: none;
+    width: 9px;
+    height: 10px;
+    color: var(--accent-ink);
+    background-image: linear-gradient(
+      90deg,
+      currentColor 0 34%,
+      transparent 34% 66%,
+      currentColor 66% 100%
+    );
+  }
+
+  .scrub.is-scrubbing .scrub__state {
+    background-image: none;
+    background-color: currentColor;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+
+  .scrub.is-scrubbing.is-reverse .scrub__state {
+    clip-path: polygon(100% 0, 0 50%, 100% 100%);
+  }
+
+  .scrub__now {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  /* --- Where a press would land --- */
+  .scrub__ghost {
+    position: absolute;
+    top: var(--band-pad);
+    left: 0;
+    right: 0;
+    transform: translateY(calc(var(--hover) * var(--band-h)));
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-quart-out);
+  }
+
+  .scrub.is-hovering .scrub__ghost {
+    opacity: 1;
+  }
+
+  /* While dragging, the ghost sits under the blade and only doubles it. */
+  .scrub.is-dragging .scrub__ghost {
+    opacity: 0;
+  }
+
+  .scrub__ghostBlade {
+    position: absolute;
+    top: -1px;
+    right: calc(var(--rail-inset) - 3px);
+    width: calc(var(--rail-w) + 6px);
+    height: 2px;
+    background-color: var(--fg);
+    opacity: 0.5;
+  }
+
+  .scrub__ghostName {
+    position: absolute;
+    top: -0.6em;
+    right: calc(var(--rail-inset) + var(--rail-w) + var(--space-2));
+    font-size: 0.5625rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    white-space: nowrap;
+  }
+
+  /* --- Marks --- */
+  .scrub__marks {
+    list-style: none;
+  }
+
+  .scrub__mark {
+    --mag: 0;
+    position: absolute;
+    top: calc(var(--at, 0) * 100%);
+    right: 0;
+  }
+
+  .scrub__link {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* 44px of target for a 10px mark — same reasoning as the header nav. */
+    min-height: 44px;
+    margin-top: -22px;
+    padding-left: var(--space-3);
+    color: var(--fg-subtle);
+    pointer-events: auto;
+  }
+
+  .scrub__notch {
+    flex: none;
+    width: 12px;
+    height: 2px;
+    /* Clear of the track, so a marker never cuts through the waveform. */
+    margin-right: calc(var(--rail-inset) + var(--rail-w) + 5px);
+    background-color: var(--fg-subtle);
+    /* Leans towards the pointer; --mag is written per pointer frame, so it is
+       deliberately not transitioned. */
+    transform: scaleX(calc(1 + var(--mag) * 0.5));
+    transform-origin: right;
+    transition: background-color var(--duration-fast) var(--ease-quart-out),
+      height var(--duration-fast) var(--ease-quart-out);
+  }
+
+  /* Where you have been reads solid; what is ahead stays quiet. */
+  .scrub__mark.is-passed .scrub__notch {
+    background-color: var(--border);
+  }
+
+  .scrub__mark.is-current .scrub__notch,
+  .scrub__link:hover .scrub__notch,
+  .scrub__link:focus-visible .scrub__notch {
+    height: 4px;
+    background-color: var(--accent-ink);
+  }
+
+  /* Out of flow, so an unhovered label never widens the target. */
+  .scrub__label {
+    position: absolute;
+    top: 50%;
+    right: calc(var(--rail-inset) + var(--rail-w) + 22px);
+    padding: 3px var(--space-2);
+    border: var(--border-width) solid var(--border);
+    background-color: var(--surface);
+    box-shadow: var(--shadow);
+    color: var(--fg);
+    font-size: 0.5625rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(var(--space-3), -50%);
+    transition: opacity var(--duration-fast) var(--ease-quart-out),
+      transform var(--duration) var(--ease-expo-in-out);
+  }
+
+  .scrub__link:hover .scrub__label,
+  .scrub__link:focus-visible .scrub__label {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+
+  /* Nothing here may start off-position when motion is turned down: the global
+     rule zeroes durations, which would otherwise leave the label parked where
+     its transition began. */
+  @media (prefers-reduced-motion: reduce) {
+    .scrub__label,
+    .scrub__link:hover .scrub__label,
+    .scrub__link:focus-visible .scrub__label {
+      transform: translate(0, -50%);
+    }
+
+    .scrub__notch {
+      transform: none;
+    }
+
+    .scrub__blade,
+    .scrub__waves--played .scrub__wave {
+      transform: none;
+    }
+  }
+</style>
