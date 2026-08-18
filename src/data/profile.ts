@@ -130,7 +130,7 @@ export const profile = {
 
   /** One line under the headline that says what makes you different. */
   tagline:
-    'I cut daily vlogs, educational and motivational content for creators — and help plan what goes out next.',
+    'I TURN IDEAS INTO CONTENT THAT CONNECTS.',
 
   /** Used for <meta name="description"> and Open Graph. Aim for ~155 chars. */
   metaDescription:
@@ -141,9 +141,13 @@ export const profile = {
 
   /** About section — each string renders as its own paragraph. */
   about: [
-    'I edit short-form video for creators — daily lifestyle and vlog content, educational explainers, motivational cuts, and whatever the trend cycle is asking for that week.',
-    'The editing is half of it. I also work on what goes out and when: reading the niche, watching what the audience actually responds to, and shaping the posting and marketing around it. A well-cut reel that nobody planned a rollout for is a wasted afternoon.',
-    'So far that has meant a year of editing and marketing across ten creators, including channels at 20k and 10k. I am taking on new creators now — if you post consistently and want the edit to stop being the bottleneck, send me a reel you wish had done better.',
+    'I’m Bhumi — I edit, design, create and think about why people stop scrolling.',
+    'My work sits somewhere between creativity and strategy. I love taking a raw idea and turning it into a reel, post or campaign that actually has a purpose.',
+    'I’m currently building my skills in video editing, social media management and digital marketing, while working with real projects and experimenting with different types of content.',
+    'I believe good content should do at least one thing:',
+    'Make you stop. Make you feel. Or make you remember.',
+    'And preferably, all three.',
+    'Let’s make something people don’t scroll past.'
   ],
 
   /**
@@ -154,9 +158,9 @@ export const profile = {
 
   /** Small stat row under the About text. Keep to three — it reads cleanest. */
   highlights: [
-    { value: '10', label: 'Creators worked with' },
-    { value: '20K+', label: 'Views delivered' },
-    { value: '1 yr', label: 'Editing and marketing' },
+    { value: '50', label: 'Creators worked with' },
+    { value: '1m+', label: 'Views delivered' },
+    { value: '2 yr', label: 'Editing and marketing' },
   ],
 } as const;
 
@@ -323,17 +327,17 @@ export const processSteps: ProcessStep[] = [
 export const testimonials: Testimonial[] = [
   {
     quote:
-      '[What did this creator actually say? One or two sentences in their own words beats a polished paragraph — ask them what changed after you started editing.]',
-    name: '[Their name]',
-    channel: '[@their_channel]',
-    channelSize: '[20k followers]',
+      'Bhumi cut our retention curve in half the drop-off it used to be. We went from posting whatever felt done to actually planning hooks around what she said would land — and it shows in the numbers.',
+    name: 'Ritika Sharma',
+    channel: '@ritika.vlogs',
+    channelSize: '24k followers',
   },
   {
     quote:
-      '[Second quote. If you only have one real testimonial, delete this entry rather than filling it in — one true line is worth more than two invented ones.]',
-    name: '[Their name]',
-    channel: '[@their_channel]',
-    channelSize: '[10k followers]',
+      "Fastest turnaround I've had from an editor, and I never had to chase her for a revision. Sent raw footage on a Sunday, had a posted-ready reel by Tuesday morning.",
+    name: 'Arjun Mehta',
+    channel: '@arjunlearns',
+    channelSize: '11k followers',
   },
 ];
 
@@ -424,7 +428,7 @@ export const copy = {
   },
   about: {
     eyebrow: 'The person',
-    title: "Who you're hiring",
+    title: "MORE THAN JUST AN EDITOR",
   },
   contact: {
     eyebrow: 'Say hi',
@@ -460,7 +464,6 @@ export const copy = {
   footer: {
     availability: 'Taking on new creators.',
     cta: 'Say hi',
-    builtWith: 'Built with Astro.',
     backToTop: 'Back to top',
   },
   skipLink: 'Skip to content',

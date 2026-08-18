@@ -1,11 +1,12 @@
 ---
 /**
- * A silent, always-playing marquee: one row of clips drifting right to left,
- * looping forever, edge to edge across the full viewport width. Row height
- * is fixed and each tile's width comes straight from its `aspect`, so
- * verticals stay narrow and landscapes stay wide with zero gap between them
- * — a flex row has nowhere for a gap to hide, unlike a grid mixing aspect
- * ratios across columns.
+ * A silent, always-playing marquee: 3 rows of clips drifting in alternating
+ * directions (top and bottom right-to-left, middle left-to-right), looping
+ * forever, edge to edge across the full viewport width. Row height is fixed
+ * and each tile's width comes straight from its `aspect`, so verticals stay
+ * narrow and landscapes stay wide with zero gap between them — a flex row
+ * has nowhere for a gap to hide, unlike a grid mixing aspect ratios across
+ * columns.
  *
  * Tiles are animated WebP rendered as plain <img> elements, not <video> —
  * an animated image always plays, in every browser, with no autoplay
@@ -13,15 +14,25 @@
  * off-screen. That sidesteps the whole class of "stopped playing" bugs a
  * <video autoplay> wall is prone to.
  *
- * The track is the clip list rendered twice back to back; animating it from
- * translateX(0) to translateX(-50%) is exactly one set-width, so the loop
- * point is invisible. The second set is aria-hidden — it's the same content
+ * Each row's track is the same clip list rendered twice back to back;
+ * animating it from translateX(0) to translateX(-50%) is exactly one
+ * set-width, so the loop point is invisible. Reversing that same animation
+ * (rather than writing a second keyframes block) gives the middle row its
+ * opposite direction. Rows run at different durations on purpose — three
+ * rows at identical speed reads as mechanical, a slight offset reads as
+ * alive. The second set in each row is aria-hidden — it's the same content
  * again, not new information.
  */
 import { showreelClips, copy } from '../data/profile';
 import SectionHeading from './SectionHeading.astro';
 
 const track = [...showreelClips, ...showreelClips];
+
+const rows = [
+  { direction: 'forward', duration: '32s' },
+  { direction: 'reverse', duration: '26s' },
+  { direction: 'forward', duration: '38s' },
+] as const;
 ---
 
 <section class="section" id="work" aria-labelledby="work-heading">
@@ -33,38 +44,51 @@ const track = [...showreelClips, ...showreelClips];
     />
   </div>
 
-  <div class="marquee">
-    <ul class="track">
-      {
-        track.map((clip, i) => (
-          <li class="tile" style={`aspect-ratio: ${clip.aspect}`} aria-hidden={i >= showreelClips.length ? 'true' : undefined}>
-            <img
-              src={clip.src}
-              data-poster={clip.poster.src}
-              alt={clip.title}
-              loading="eager"
-              decoding="async"
-            />
-          </li>
-        ))
-      }
-    </ul>
+  <div class="marquee-stack">
+    {
+      rows.map((row) => (
+        <div class="marquee">
+          <ul class="track" style={`animation-direction: ${row.direction}; animation-duration: ${row.duration}`}>
+            {track.map((clip, i) => (
+              <li class="tile" style={`aspect-ratio: ${clip.aspect}`} aria-hidden={i >= showreelClips.length ? 'true' : undefined}>
+                <img
+                  src={clip.src}
+                  data-poster={clip.poster.src}
+                  alt={clip.title}
+                  loading="eager"
+                  decoding="async"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
   </div>
 </section>
 
 <style>
-  .marquee {
-    overflow: hidden;
+  .marquee-stack {
     width: 100vw;
     margin-left: calc(50% - 50vw);
     border-block: var(--border-width) solid var(--border);
   }
 
+  .marquee {
+    overflow: hidden;
+  }
+
+  .marquee + .marquee {
+    border-top: var(--border-width) solid var(--border);
+  }
+
   .track {
     display: flex;
     width: max-content;
-    height: clamp(9.5rem, 20vw, 17.5rem);
-    animation: showreel-scroll 32s linear infinite;
+    height: clamp(7rem, 14vw, 12rem);
+    animation-name: showreel-scroll;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
   }
 
   @keyframes showreel-scroll {
