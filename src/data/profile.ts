@@ -12,6 +12,14 @@
  */
 
 import type { ImageMetadata } from 'astro';
+import showreelPoster01 from '../assets/showreel/showreel-01.jpg';
+import showreelPoster02 from '../assets/showreel/showreel-02.jpg';
+import showreelPoster03 from '../assets/showreel/showreel-03.jpg';
+import showreelPoster04 from '../assets/showreel/showreel-04.jpg';
+import showreelPoster05 from '../assets/showreel/showreel-05.jpg';
+import showreelPoster06 from '../assets/showreel/showreel-06.jpg';
+import showreelPoster07 from '../assets/showreel/showreel-07.jpg';
+import showreelPoster08 from '../assets/showreel/showreel-08.jpg';
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                       */
@@ -61,6 +69,22 @@ export interface Reel {
    * still works, it just carries less punch.
    */
   cover: ImageMetadata | null;
+}
+
+export interface ShowreelClip {
+  /** Not displayed — used only as the tile's accessible name. */
+  title: string;
+  /** width / height, e.g. 0.5625 for 9:16, 1 for square, 1.78 for 16:9. */
+  aspect: number;
+  /**
+   * Animated WebP under public/, e.g. '/videos/showreel-01.webp'. Rendered as
+   * a plain <img> — an animated image always plays, in every browser, with
+   * no autoplay permission and no risk of the browser suspending it once
+   * it's off-screen, unlike a <video autoplay> element.
+   */
+  src: string;
+  /** First-frame poster, imported like Reel.cover — also the reduced-motion fallback frame. */
+  poster: ImageMetadata;
 }
 
 export interface Service {
@@ -211,6 +235,28 @@ export const reels: Reel[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
+/* Showreel — a silent, autoplaying wall of clips, vertical and landscape mixed */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Each clip is 8 seconds, silent, and rendered as an animated WebP tile in
+ * the marquee (see Showreel.astro) — always playing, no autoplay dance
+ * required. Add a clip by dropping its .webp in public/videos/, a poster
+ * frame in src/assets/showreel/, and an entry here with the right aspect
+ * ratio.
+ */
+export const showreelClips: ShowreelClip[] = [
+  { title: 'Vertical edit, clip 1', aspect: 9 / 16, src: '/videos/showreel-01.webp', poster: showreelPoster01 },
+  { title: 'Vertical edit, clip 2', aspect: 9 / 16, src: '/videos/showreel-02.webp', poster: showreelPoster02 },
+  { title: 'Landscape edit, clip 3', aspect: 16 / 9, src: '/videos/showreel-03.webp', poster: showreelPoster03 },
+  { title: 'Square edit, clip 4', aspect: 1, src: '/videos/showreel-04.webp', poster: showreelPoster04 },
+  { title: 'Vertical edit, clip 5', aspect: 9 / 16, src: '/videos/showreel-05.webp', poster: showreelPoster05 },
+  { title: 'Square edit, clip 6', aspect: 1, src: '/videos/showreel-06.webp', poster: showreelPoster06 },
+  { title: 'Landscape edit, clip 7', aspect: 16 / 9, src: '/videos/showreel-07.webp', poster: showreelPoster07 },
+  { title: 'Vertical edit, clip 8', aspect: 9 / 16, src: '/videos/showreel-08.webp', poster: showreelPoster08 },
+];
+
+/* -------------------------------------------------------------------------- */
 /* Services                                                                    */
 /* -------------------------------------------------------------------------- */
 
@@ -352,6 +398,10 @@ export const copy = {
     primaryCta: 'See the work',
     secondaryCta: 'Start a project',
     stripLabel: 'Formats I cut',
+  },
+  showreel: {
+    eyebrow: 'On loop',
+    title: 'Stuff I cut',
   },
   work: {
     eyebrow: 'The work',

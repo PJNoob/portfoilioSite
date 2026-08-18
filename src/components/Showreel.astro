@@ -1,0 +1,108 @@
+---
+/**
+ * A silent, always-playing marquee: one row of clips drifting right to left,
+ * looping forever, edge to edge across the full viewport width. Row height
+ * is fixed and each tile's width comes straight from its `aspect`, so
+ * verticals stay narrow and landscapes stay wide with zero gap between them
+ * — a flex row has nowhere for a gap to hide, unlike a grid mixing aspect
+ * ratios across columns.
+ *
+ * Tiles are animated WebP rendered as plain <img> elements, not <video> —
+ * an animated image always plays, in every browser, with no autoplay
+ * permission and no risk of the browser suspending it once it drifts
+ * off-screen. That sidesteps the whole class of "stopped playing" bugs a
+ * <video autoplay> wall is prone to.
+ *
+ * The track is the clip list rendered twice back to back; animating it from
+ * translateX(0) to translateX(-50%) is exactly one set-width, so the loop
+ * point is invisible. The second set is aria-hidden — it's the same content
+ * again, not new information.
+ */
+import { showreelClips, copy } from '../data/profile';
+import SectionHeading from './SectionHeading.astro';
+
+const track = [...showreelClips, ...showreelClips];
+---
+
+<section class="section" id="work" aria-labelledby="work-heading">
+  <div class="container">
+    <SectionHeading
+      id="work-heading"
+      eyebrow={copy.showreel.eyebrow}
+      title={copy.showreel.title}
+    />
+  </div>
+
+  <div class="marquee">
+    <ul class="track">
+      {
+        track.map((clip, i) => (
+          <li class="tile" style={`aspect-ratio: ${clip.aspect}`} aria-hidden={i >= showreelClips.length ? 'true' : undefined}>
+            <img
+              src={clip.src}
+              data-poster={clip.poster.src}
+              alt={clip.title}
+              loading="eager"
+              decoding="async"
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    border-block: var(--border-width) solid var(--border);
+  }
+
+  .track {
+    display: flex;
+    width: max-content;
+    height: clamp(9.5rem, 20vw, 17.5rem);
+    animation: showreel-scroll 32s linear infinite;
+  }
+
+  @keyframes showreel-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .tile {
+    flex: none;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .tile img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Animated WebP tiles always play on their own — no JS needed to start or
+  // resume them. The only thing this script does is respect reduced-motion:
+  // swap each tile's animated source for its static poster frame, mirroring
+  // how the rest of the site freezes motion for that preference.
+  // ---------------------------------------------------------------------------
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (prefersReducedMotion) {
+    document.querySelectorAll<HTMLImageElement>('#work .tile img').forEach((img) => {
+      const poster = img.dataset.poster;
+      if (poster) img.src = poster;
+    });
+  }
+</script>

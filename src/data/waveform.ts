@@ -13,7 +13,7 @@
  * Work section are the Work section's copy, at the height Work actually
  * occupies.
  */
-import { profile, reels, services, processSteps, testimonials, copy, enquiry } from './profile';
+import { profile, showreelClips, services, processSteps, testimonials, copy, enquiry } from './profile';
 
 /** Every string that earns a bar, in the order the page reads it. */
 const sections: { href: string; beats: (string | null)[] }[] = [
@@ -30,14 +30,7 @@ const sections: { href: string; beats: (string | null)[] }[] = [
   },
   {
     href: '#work',
-    beats: reels.flatMap((reel) => [
-      reel.title,
-      reel.client,
-      reel.clientSize,
-      reel.format,
-      reel.result,
-      ...reel.tags,
-    ]),
+    beats: showreelClips.map((clip) => clip.title),
   },
   {
     href: '#services',
