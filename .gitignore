@@ -21,3 +21,6 @@ pnpm-debug.log*
 # macOS / Windows cruft
 .DS_Store
 Thumbs.db
+
+# Claude Code local settings (personal, machine-specific)
+.claude/settings.local.json
